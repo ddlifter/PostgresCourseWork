@@ -10,17 +10,17 @@ class AddEmployee(QDialog):
         self.setWindowTitle("Add Data")
         layout = QVBoxLayout()
 
+        self.surname_label = QLabel("SurName:")
+        self.surname_input = QLineEdit()
+        self.surname_input.setReadOnly(False)
+        layout.addWidget(self.surname_label)
+        layout.addWidget(self.surname_input)
+
         self.name_label = QLabel("Name:")
         self.name_input = QLineEdit()
         self.name_input.setReadOnly(False)
         layout.addWidget(self.name_label)
         layout.addWidget(self.name_input)
-
-        self.age_label = QLabel("Age:")
-        self.age_input = QLineEdit()
-        self.age_input.setReadOnly(False)
-        layout.addWidget(self.age_label)
-        layout.addWidget(self.age_input)
 
         self.submit_button = QPushButton("Submit")
         self.submit_button.clicked.connect(self.submit_data)
@@ -35,16 +35,17 @@ class AddEmployee(QDialog):
         layout.addWidget(self.specialtyCombo)
 
     def submit_data(self):
-        name = self.nameInput.text()
+        name = self.name_input.text()
+        surname = self.surname_input.text()
         specialty_id = self.specialtyCombo.currentData()
         try:
             cur = conn.cursor()
             cur.execute("INSERT INTO employees (id_specialty, surname, name) VALUES (%s, %s, %s)",
-                        (specialty_id, name, ''))
+                        (specialty_id, surname, name))
             conn.commit()
             cur.close()
-            conn.close()
             print("Сотрудник добавлен успешно.")
+            self.close()
         except Exception as e:
             print(f"Ошибка при добавлении сотрудника: {e}")
             
@@ -56,7 +57,5 @@ class AddEmployee(QDialog):
             for specialty in specialties:
                 self.specialtyCombo.addItem(specialty[1], specialty[0])
             cur.close()
-            conn.close()
-            self.name_input.setReadOnly(False)
         except Exception as e:
             print(f"Ошибка при загрузке специальностей: {e}")

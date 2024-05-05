@@ -23,6 +23,10 @@ class Employees(QWidget):
         self.show_data_button.clicked.connect(self.load_data_from_db)
         layout.addWidget(self.show_data_button)
         
+        self.delete_button = QPushButton("Удалить")
+        self.delete_button.clicked.connect(self.delete_selected_row)
+        layout.addWidget(self.delete_button)
+        
         layout.addWidget(self.table_widget)
 
     def load_data_from_db(self):
@@ -39,4 +43,18 @@ class Employees(QWidget):
         dialog = AddEmployee()
         if dialog.exec_():
             self.load_data_from_db()
+            
+    def delete_selected_row(self):
+        selected_rows = self.table_widget.selectionModel().selectedRows()
+        if not selected_rows:
+            QMessageBox.information(self, "Уведомление", "Выберите строку для удаления.")
+            return
+        employee_id = self.table_widget.item(selected_rows[0].row(), 0).text()  # Предполагается, что ID сотрудника находится в первом столбце
+        try:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM employees WHERE id_employee = %s", (employee_id,))
+            QMessageBox.information(self, "Успех", "Строка успешно удалена.")
+            self.load_data_from_db()
+        except Exception as e:
+            QMessageBox.critical(self, "Ошибка", f"Не удалось удалить строку: {str(e)}")
 
