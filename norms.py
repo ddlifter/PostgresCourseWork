@@ -1,12 +1,15 @@
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QTableWidget
+from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QWidget, QLabel, QLineEdit, QDialog, QMessageBox, QTableWidget, QTableWidgetItem
+import psycopg2
 
+from connection import conn
+from add_norm import AddNorm
 
-class Specialties(QWidget):
+class Norms(QWidget):
     def __init__(self):
         super().__init__()
         self.showMaximized()
         layout = QVBoxLayout()
-        self.setWindowTitle("Сотрудники")
+        self.setWindowTitle("Нормы")
         self.setGeometry(100, 100, 600, 400)
         self.setLayout(layout)
         self.table_widget = QTableWidget()
@@ -28,7 +31,7 @@ class Specialties(QWidget):
 
     def load_data_from_db(self):
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM employees")  # Убедитесь, что имя таблицы верно
+        cursor.execute("SELECT * FROM norms")  # Убедитесь, что имя таблицы верно
         rows = cursor.fetchall()
         self.table_widget.setRowCount(len(rows))
         self.table_widget.setColumnCount(len(rows[0]))
@@ -37,7 +40,7 @@ class Specialties(QWidget):
                 self.table_widget.setItem(i, j, QTableWidgetItem(str(value)))
 
     def open_add_dialog(self):
-        dialog = AddEmployee()
+        dialog = AddNorm()
         if dialog.exec_():
             self.load_data_from_db()
             
@@ -46,11 +49,12 @@ class Specialties(QWidget):
         if not selected_rows:
             QMessageBox.information(self, "Уведомление", "Выберите строку для удаления.")
             return
-        employee_id = self.table_widget.item(selected_rows[0].row(), 0).text()  # Предполагается, что ID сотрудника находится в первом столбце
+        norm_id = self.table_widget.item(selected_rows[0].row(), 0).text()  # Предполагается, что ID сотрудника находится в первом столбце
         try:
             cursor = conn.cursor()
-            cursor.execute("DELETE FROM employees WHERE id_employee = %s", (employee_id,))
+            cursor.execute("DELETE FROM norms WHERE id_norm = %s", (norm_id,))
             QMessageBox.information(self, "Успех", "Строка успешно удалена.")
             self.load_data_from_db()
         except Exception as e:
             QMessageBox.critical(self, "Ошибка", f"Не удалось удалить строку: {str(e)}")
+

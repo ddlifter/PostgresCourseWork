@@ -1,12 +1,13 @@
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QTableWidget
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QTableWidget, QTableWidgetItem, QMessageBox
+from connection import conn
+from add_rank import AddRank
 
-
-class Specialties(QWidget):
+class Ranks(QWidget):
     def __init__(self):
         super().__init__()
         self.showMaximized()
         layout = QVBoxLayout()
-        self.setWindowTitle("Сотрудники")
+        self.setWindowTitle("Разряды")
         self.setGeometry(100, 100, 600, 400)
         self.setLayout(layout)
         self.table_widget = QTableWidget()
@@ -28,7 +29,7 @@ class Specialties(QWidget):
 
     def load_data_from_db(self):
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM employees")  # Убедитесь, что имя таблицы верно
+        cursor.execute("SELECT * FROM ranks")  # Убедитесь, что имя таблицы верно
         rows = cursor.fetchall()
         self.table_widget.setRowCount(len(rows))
         self.table_widget.setColumnCount(len(rows[0]))
@@ -37,7 +38,7 @@ class Specialties(QWidget):
                 self.table_widget.setItem(i, j, QTableWidgetItem(str(value)))
 
     def open_add_dialog(self):
-        dialog = AddEmployee()
+        dialog = AddRank()
         if dialog.exec_():
             self.load_data_from_db()
             
@@ -46,10 +47,10 @@ class Specialties(QWidget):
         if not selected_rows:
             QMessageBox.information(self, "Уведомление", "Выберите строку для удаления.")
             return
-        employee_id = self.table_widget.item(selected_rows[0].row(), 0).text()  # Предполагается, что ID сотрудника находится в первом столбце
+        rank_id = self.table_widget.item(selected_rows[0].row(), 0).text()  # Предполагается, что ID сотрудника находится в первом столбце
         try:
             cursor = conn.cursor()
-            cursor.execute("DELETE FROM employees WHERE id_employee = %s", (employee_id,))
+            cursor.execute("DELETE FROM ranks WHERE id_rank = %s", (rank_id,))
             QMessageBox.information(self, "Успех", "Строка успешно удалена.")
             self.load_data_from_db()
         except Exception as e:
