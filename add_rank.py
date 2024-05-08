@@ -6,8 +6,7 @@ from connection import ConnectionManager
 class AddRank(QDialog):
     def __init__(self, conn: ConnectionManager):
         super().__init__()
-        self.conn = conn
-        self.conn = self.conn.connect()
+        self.conn : ConnectionManager = conn
 
         self.setWindowTitle("Add Data")
         layout = QVBoxLayout()
@@ -31,16 +30,17 @@ class AddRank(QDialog):
         self.setLayout(layout)
 
     def submit_data(self):
-        name = self.name_input.text()
-        surname = self.surname_input.text()
-        try:
-            cur = self.conn.cursor()
-            cur.execute("INSERT INTO ranks (name, description) VALUES (%s, %s)",
-                        (name, surname))
-            self.conn.commit()
-            cur.close()
-            print("Разряд добавлен успешно.")
-            self.close()
-        except Exception as e:
-            print(f"Ошибка при добавлении разряда: {e}")
+        with self.conn as conn:
+            with conn.cursor() as cur:
+                name = self.name_input.text()
+                surname = self.surname_input.text()
+                try:
+                    cur.execute("INSERT INTO ranks (name, description) VALUES (%s, %s)",
+                                (name, surname))
+                    conn.commit()
+                    cur.close()
+                    print("Разряд добавлен успешно.")
+                    self.close()
+                except Exception as e:
+                    print(f"Ошибка при добавлении разряда: {e}")
             

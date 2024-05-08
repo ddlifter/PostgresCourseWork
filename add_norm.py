@@ -6,9 +6,7 @@ from connection import ConnectionManager
 class AddNorm(QDialog):
     def __init__(self, conn: ConnectionManager):
         super().__init__()
-        self.conn = conn
-        self.conn.connect()
-        self.conn = self.conn.connect()
+        self.conn : ConnectionManager = conn
 
 
         self.setWindowTitle("Add Data")
@@ -41,27 +39,29 @@ class AddNorm(QDialog):
         
 
     def submit_data(self):
-        name = self.name_input.text()
-        surname = self.surname_input.text()
-        rank_id = self.specialtyCombo.currentData()
-        try:
-            cur = self.conn.cursor()
-            cur.execute("INSERT INTO norms (id_rank, name, description) VALUES (%s, %s, %s)",
-                        (rank_id, name, surname))
-            self.conn.commit()
-            cur.close()
-            print("Сотрудник добавлен успешно.")
-            self.close()
-        except Exception as e:
-            print(f"Ошибка при добавлении нормы: {e}")
+        with self.conn as conn:
+            with conn.cursor() as cur:
+                name = self.name_input.text()
+                surname = self.surname_input.text()
+                rank_id = self.specialtyCombo.currentData()
+                try:
+                    cur.execute("INSERT INTO norms (id_rank, name, description) VALUES (%s, %s, %s)",
+                                (rank_id, name, surname))
+                    conn.commit()
+                    cur.close()
+                    print("Сотрудник добавлен успешно.")
+                    self.close()
+                except Exception as e:
+                    print(f"Ошибка при добавлении нормы: {e}")
             
     def loadSpecialties(self):
-        try:
-            cur = self.conn.cursor()
-            cur.execute("SELECT id_rank, name FROM ranks")
-            specialties = cur.fetchall()
-            for specialty in specialties:
-                self.specialtyCombo.addItem(specialty[1], specialty[0])
-            cur.close()
-        except Exception as e:
-            print(f"Ошибка при загрузке разрядов: {e}")
+        with self.conn as conn:
+            with conn.cursor() as cur:
+                try:
+                    cur.execute("SELECT id_rank, name FROM ranks")
+                    specialties = cur.fetchall()
+                    for specialty in specialties:
+                        self.specialtyCombo.addItem(specialty[1], specialty[0])
+                    cur.close()
+                except Exception as e:
+                    print(f"Ошибка при загрузке разрядов: {e}")

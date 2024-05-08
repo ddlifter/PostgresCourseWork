@@ -9,7 +9,7 @@ from connection import ConnectionManager
 
 class MainForm(QMainWindow):
     def __init__(self, conn: ConnectionManager):
-        self.conn = conn
+        self.conn : ConnectionManager = conn
         super().__init__()
         self.setWindowTitle("Main Form")
         self.setGeometry(100, 100, 600, 400)

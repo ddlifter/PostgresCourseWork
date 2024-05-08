@@ -5,6 +5,7 @@ from add_rank import AddRank
 class Ranks(QWidget):
     def __init__(self, conn: ConnectionManager):
         super().__init__()
+        self.conn : ConnectionManager = conn
         self.showMaximized()
         layout = QVBoxLayout()
         self.setWindowTitle("Разряды")
@@ -28,30 +29,33 @@ class Ranks(QWidget):
         layout.addWidget(self.table_widget)
 
     def load_data_from_db(self):
-        cursor = self.conn.cursor()
-        cursor.execute("SELECT * FROM ranks")  # Убедитесь, что имя таблицы верно
-        rows = cursor.fetchall()
-        self.table_widget.setRowCount(len(rows))
-        self.table_widget.setColumnCount(len(rows[0]))
-        for i, row in enumerate(rows):
-            for j, value in enumerate(row):
-                self.table_widget.setItem(i, j, QTableWidgetItem(str(value)))
+        with self.conn as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT * FROM ranks")  # Убедитесь, что имя таблицы верно
+                rows = cursor.fetchall()
+                self.table_widget.setRowCount(len(rows))
+                self.table_widget.setColumnCount(len(rows[0]))
+                for i, row in enumerate(rows):
+                    for j, value in enumerate(row):
+                        self.table_widget.setItem(i, j, QTableWidgetItem(str(value)))
 
     def open_add_dialog(self):
-        dialog = AddRank()
+        dialog = AddRank(self.conn)
         if dialog.exec_():
             self.load_data_from_db()
             
     def delete_selected_row(self):
-        selected_rows = self.table_widget.selectionModel().selectedRows()
-        if not selected_rows:
-            QMessageBox.information(self, "Уведомление", "Выберите строку для удаления.")
-            return
-        rank_id = self.table_widget.item(selected_rows[0].row(), 0).text()  # Предполагается, что ID сотрудника находится в первом столбце
-        try:
-            cursor = self.conn.cursor()
-            cursor.execute("DELETE FROM ranks WHERE id_rank = %s", (rank_id,))
-            QMessageBox.information(self, "Успех", "Строка успешно удалена.")
-            self.load_data_from_db()
-        except Exception as e:
-            QMessageBox.critical(self, "Ошибка", f"Не удалось удалить строку: {str(e)}")
+        with self.conn as conn:
+            with conn.cursor() as cursor:
+                selected_rows = self.table_widget.selectionModel().selectedRows()
+                if not selected_rows:
+                    QMessageBox.information(self, "Уведомление", "Выберите строку для удаления.")
+                    return
+                rank_id = self.table_widget.item(selected_rows[0].row(), 0).text()  # Предполагается, что ID сотрудника находится в первом столбце
+                try:
+                    cursor.execute("DELETE FROM ranks WHERE id_rank = %s", (rank_id,))
+                    conn.commit()
+                    QMessageBox.information(self, "Успех", "Строка успешно удалена.")
+                    self.load_data_from_db()
+                except Exception as e:
+                    QMessageBox.critical(self, "Ошибка", f"Не удалось удалить строку: {str(e)}")

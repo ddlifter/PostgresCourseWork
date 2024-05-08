@@ -6,8 +6,7 @@ from connection import ConnectionManager
 class AddEmployee(QDialog):
     def __init__(self, conn: ConnectionManager):
         super().__init__()
-        self.conn = conn
-        self.conn = self.conn.connect()
+        self.conn : ConnectionManager = conn
 
         self.setWindowTitle("Add Data")
         layout = QVBoxLayout()
@@ -37,27 +36,29 @@ class AddEmployee(QDialog):
         layout.addWidget(self.specialtyCombo)
 
     def submit_data(self):
-        name = self.name_input.text()
-        surname = self.surname_input.text()
-        specialty_id = self.specialtyCombo.currentData()
-        try:
-            cur = self.conn.cursor()
-            cur.execute("INSERT INTO employees (id_specialty, surname, name) VALUES (%s, %s, %s)",
-                        (specialty_id, surname, name))
-            self.conn.commit()
-            cur.close()
-            print("Сотрудник добавлен успешно.")
-            self.close()
-        except Exception as e:
-            print(f"Ошибка при добавлении сотрудника: {e}")
+        with self.conn as conn:
+            with conn.cursor() as cur:
+                name = self.name_input.text()
+                surname = self.surname_input.text()
+                specialty_id = self.specialtyCombo.currentData()
+                try:
+                    cur.execute("INSERT INTO employees (id_specialty, surname, name) VALUES (%s, %s, %s)",
+                                (specialty_id, surname, name))
+                    conn.commit()
+                    cur.close()
+                    print("Сотрудник добавлен успешно.")
+                    self.close()
+                except Exception as e:
+                    print(f"Ошибка при добавлении сотрудника: {e}")
             
     def loadSpecialties(self):
-        try:
-            cur = self.conn.cursor()
-            cur.execute("SELECT id_specialty, name FROM specialties")
-            specialties = cur.fetchall()
-            for specialty in specialties:
-                self.specialtyCombo.addItem(specialty[1], specialty[0])
-            cur.close()
-        except Exception as e:
-            print(f"Ошибка при загрузке специальностей: {e}")
+        with self.conn as conn:
+            with conn.cursor() as cur:
+                try:
+                    cur.execute("SELECT id_specialty, name FROM specialties")
+                    specialties = cur.fetchall()
+                    for specialty in specialties:
+                        self.specialtyCombo.addItem(specialty[1], specialty[0])
+                    cur.close()
+                except Exception as e:
+                    print(f"Ошибка при загрузке специальностей: {e}")
