@@ -1,12 +1,14 @@
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QTableWidget
-
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QTableWidget, QTableWidgetItem, QMessageBox
+from connection import ConnectionManager
 
 class Specialties(QWidget):
-    def __init__(self):
+    def __init__(self, conn: ConnectionManager):
+        self.conn = conn
+        self.conn = self.conn.connect()
         super().__init__()
         self.showMaximized()
         layout = QVBoxLayout()
-        self.setWindowTitle("Сотрудники")
+        self.setWindowTitle("Специальности")
         self.setGeometry(100, 100, 600, 400)
         self.setLayout(layout)
         self.table_widget = QTableWidget()
@@ -27,8 +29,8 @@ class Specialties(QWidget):
         layout.addWidget(self.table_widget)
 
     def load_data_from_db(self):
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM employees")  # Убедитесь, что имя таблицы верно
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT * FROM specialties")  # Убедитесь, что имя таблицы верно
         rows = cursor.fetchall()
         self.table_widget.setRowCount(len(rows))
         self.table_widget.setColumnCount(len(rows[0]))
@@ -48,7 +50,7 @@ class Specialties(QWidget):
             return
         employee_id = self.table_widget.item(selected_rows[0].row(), 0).text()  # Предполагается, что ID сотрудника находится в первом столбце
         try:
-            cursor = conn.cursor()
+            cursor = self.conn.cursor()
             cursor.execute("DELETE FROM employees WHERE id_employee = %s", (employee_id,))
             QMessageBox.information(self, "Успех", "Строка успешно удалена.")
             self.load_data_from_db()

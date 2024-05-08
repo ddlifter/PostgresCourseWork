@@ -1,12 +1,14 @@
 from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QWidget, QLabel, QLineEdit, QDialog, QMessageBox, QTableWidget, QTableWidgetItem
 import psycopg2
 
-from connection import conn
+from connection import ConnectionManager
 from add_employee import AddEmployee
 
 class Employees(QWidget):
-    def __init__(self):
+    def __init__(self, conn: ConnectionManager):
         super().__init__()
+        self.conn: ConnectionManager = conn
+        self.conn = self.conn.connect()
         self.showMaximized()
         layout = QVBoxLayout()
         self.setWindowTitle("Сотрудники")
@@ -30,7 +32,7 @@ class Employees(QWidget):
         layout.addWidget(self.table_widget)
 
     def load_data_from_db(self):
-        cursor = conn.cursor()
+        cursor = self.conn.cursor()
         cursor.execute("SELECT * FROM employees")  # Убедитесь, что имя таблицы верно
         rows = cursor.fetchall()
         self.table_widget.setRowCount(len(rows))
@@ -51,7 +53,7 @@ class Employees(QWidget):
             return
         employee_id = self.table_widget.item(selected_rows[0].row(), 0).text()  # Предполагается, что ID сотрудника находится в первом столбце
         try:
-            cursor = conn.cursor()
+            cursor = self.conn.cursor()
             cursor.execute("DELETE FROM employees WHERE id_employee = %s", (employee_id,))
             QMessageBox.information(self, "Успех", "Строка успешно удалена.")
             self.load_data_from_db()

@@ -1,9 +1,9 @@
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QTableWidget, QTableWidgetItem, QMessageBox
-from connection import conn
+from connection import ConnectionManager
 from add_rank import AddRank
 
 class Ranks(QWidget):
-    def __init__(self):
+    def __init__(self, conn: ConnectionManager):
         super().__init__()
         self.showMaximized()
         layout = QVBoxLayout()
@@ -28,7 +28,7 @@ class Ranks(QWidget):
         layout.addWidget(self.table_widget)
 
     def load_data_from_db(self):
-        cursor = conn.cursor()
+        cursor = self.conn.cursor()
         cursor.execute("SELECT * FROM ranks")  # Убедитесь, что имя таблицы верно
         rows = cursor.fetchall()
         self.table_widget.setRowCount(len(rows))
@@ -49,7 +49,7 @@ class Ranks(QWidget):
             return
         rank_id = self.table_widget.item(selected_rows[0].row(), 0).text()  # Предполагается, что ID сотрудника находится в первом столбце
         try:
-            cursor = conn.cursor()
+            cursor = self.conn.cursor()
             cursor.execute("DELETE FROM ranks WHERE id_rank = %s", (rank_id,))
             QMessageBox.information(self, "Успех", "Строка успешно удалена.")
             self.load_data_from_db()

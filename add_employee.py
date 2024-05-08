@@ -1,11 +1,13 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLineEdit, QLabel, QDialog, QMessageBox, QComboBox
 import psycopg2
-from connection import conn
+from connection import ConnectionManager
 
 class AddEmployee(QDialog):
-    def __init__(self):
+    def __init__(self, conn: ConnectionManager):
         super().__init__()
+        self.conn = conn
+        self.conn = self.conn.connect()
 
         self.setWindowTitle("Add Data")
         layout = QVBoxLayout()
@@ -39,10 +41,10 @@ class AddEmployee(QDialog):
         surname = self.surname_input.text()
         specialty_id = self.specialtyCombo.currentData()
         try:
-            cur = conn.cursor()
+            cur = self.conn.cursor()
             cur.execute("INSERT INTO employees (id_specialty, surname, name) VALUES (%s, %s, %s)",
                         (specialty_id, surname, name))
-            conn.commit()
+            self.conn.commit()
             cur.close()
             print("Сотрудник добавлен успешно.")
             self.close()
@@ -51,7 +53,7 @@ class AddEmployee(QDialog):
             
     def loadSpecialties(self):
         try:
-            cur = conn.cursor()
+            cur = self.conn.cursor()
             cur.execute("SELECT id_specialty, name FROM specialties")
             specialties = cur.fetchall()
             for specialty in specialties:

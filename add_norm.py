@@ -1,11 +1,15 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLineEdit, QLabel, QDialog, QMessageBox, QComboBox
 import psycopg2
-from connection import conn
+from connection import ConnectionManager
 
 class AddNorm(QDialog):
-    def __init__(self):
+    def __init__(self, conn: ConnectionManager):
         super().__init__()
+        self.conn = conn
+        self.conn.connect()
+        self.conn = self.conn.connect()
+
 
         self.setWindowTitle("Add Data")
         layout = QVBoxLayout()
@@ -41,10 +45,10 @@ class AddNorm(QDialog):
         surname = self.surname_input.text()
         rank_id = self.specialtyCombo.currentData()
         try:
-            cur = conn.cursor()
+            cur = self.conn.cursor()
             cur.execute("INSERT INTO norms (id_rank, name, description) VALUES (%s, %s, %s)",
                         (rank_id, name, surname))
-            conn.commit()
+            self.conn.commit()
             cur.close()
             print("Сотрудник добавлен успешно.")
             self.close()
@@ -53,7 +57,7 @@ class AddNorm(QDialog):
             
     def loadSpecialties(self):
         try:
-            cur = conn.cursor()
+            cur = self.conn.cursor()
             cur.execute("SELECT id_rank, name FROM ranks")
             specialties = cur.fetchall()
             for specialty in specialties:
