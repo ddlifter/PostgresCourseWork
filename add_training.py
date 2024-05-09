@@ -1,6 +1,7 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLineEdit, QLabel, QDialog, QMessageBox, QComboBox
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLineEdit, QLabel, QDialog, QMessageBox, QComboBox, QDateEdit
 import psycopg2
+from PyQt5.QtCore import QDate
 from connection import ConnectionManager
 
 class AddTraining(QDialog):
@@ -11,11 +12,18 @@ class AddTraining(QDialog):
         self.setWindowTitle("Add Data")
         layout = QVBoxLayout()
 
-        self.name_label = QLabel("Name:")
-        self.name_input = QLineEdit()
-        self.name_input.setReadOnly(False)
-        layout.addWidget(self.name_label)
-        layout.addWidget(self.name_input)
+        self.date_label = QLabel("Дата:")
+        layout.addWidget(self.date_label)
+
+        # Поле для ввода даты с раскрывающимся календарем
+        self.date_input = QDateEdit()
+        self.date_input.setCalendarPopup(True)  # Включаем возможность открытия календаря
+        self.date_input.setDate(QDate.currentDate())  # Устанавливаем текущую дату как начальную
+        layout.addWidget(self.date_input)
+
+        # Устанавливаем макет в виджет
+        self.setLayout(layout)
+        self.setWindowTitle("Выбор даты")
 
         self.submit_button = QPushButton("Submit")
         self.submit_button.clicked.connect(self.submit_data)
@@ -34,11 +42,13 @@ class AddTraining(QDialog):
         self.loadNorms()
         layout.addWidget(self.specialtyLabel2)
         layout.addWidget(self.specialtyCombo2)
+        
+
 
     def submit_data(self):
         with self.conn as conn:
             with conn.cursor() as cur:
-                name = self.name_input.text()
+                name = self.date_input.text()
                 empl_id = self.specialtyCombo.currentData()
                 norm_id = self.specialtyCombo2.currentData()
                 try:
