@@ -4,12 +4,12 @@ from specialties import Specialties
 from norms import Norms
 from ranks import Ranks
 from training import Training
-from roles_changes import do_for_admin, do_for_empl
 import sys
 from connection import ConnectionManager
+IsAdmin = True
 
 class MainForm(QMainWindow):
-    def __init__(self, conn: ConnectionManager):
+    def __init__(self, conn: ConnectionManager, IsAdmin):
         self.conn : ConnectionManager = conn
         super().__init__()
         self.setWindowTitle("Main Form")
@@ -51,27 +51,27 @@ class MainForm(QMainWindow):
         self.setCentralWidget(central_widget)
 
     def open_form1(self):
-        self.form1 = Employees(self.conn)
+        self.form1 = Employees(self.conn, IsAdmin)
         self.form1.show()
         self.close()
 
     def open_form2(self):
-        self.form2 = Specialties(self.conn)
+        self.form2 = Specialties(self.conn, IsAdmin)
         self.form2.show()
         self.close()
 
     def open_form3(self):
-        self.form3 = Norms(self.conn)
+        self.form3 = Norms(self.conn, IsAdmin)
         self.form3.show()
         self.close()
         
     def open_form4(self):
-        self.form4 = Ranks(self.conn)
+        self.form4 = Ranks(self.conn, IsAdmin)
         self.form4.show()
         self.close()
         
     def open_form5(self):
-        self.form5 = Training(self.conn)
+        self.form5 = Training(self.conn, IsAdmin)
         self.form5.show()
         self.close()
         
@@ -101,16 +101,18 @@ class AuthorizationWindow(QWidget):
 
     def handleAdminClick(self):
         conn = ConnectionManager("admin_role")
-        do_for_admin()
-        self.form1 = MainForm(conn)
+        global IsAdmin
+        IsAdmin = True
+        self.form1 = MainForm(conn, IsAdmin)
         self.form1.show()
         self.close()
 
 
     def handleEmployeeClick(self):
         conn = ConnectionManager("employee_role")
-        do_for_empl()
-        self.form1 = MainForm(conn)
+        global IsAdmin
+        IsAdmin = False
+        self.form1 = MainForm(conn, IsAdmin)
         self.form1.show()
         self.close()
         

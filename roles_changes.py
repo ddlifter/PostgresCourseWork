@@ -1,7 +1,8 @@
-
-
-def do_for_admin():
-    pass
-
-def do_for_empl():
-    pass
+IsAdmin = True
+def change(role):
+    global IsAdmin
+    if role == "admin":
+        IsAdmin = True
+    else:
+        IsAdmin = False
+            

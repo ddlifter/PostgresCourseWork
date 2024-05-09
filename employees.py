@@ -5,7 +5,7 @@ from connection import ConnectionManager
 from add_employee import AddEmployee
 
 class Employees(QWidget):
-    def __init__(self, conn: ConnectionManager):
+    def __init__(self, conn: ConnectionManager, IsAdmin):
         super().__init__()
         self.conn: ConnectionManager = conn
         self.showMaximized()
@@ -29,6 +29,11 @@ class Employees(QWidget):
         layout.addWidget(self.delete_button)
         
         layout.addWidget(self.table_widget)
+
+        if IsAdmin != True:
+            self.add_button.setEnabled(False)
+            self.delete_button.setEnabled(False)
+        
 
     def load_data_from_db(self):
         with self.conn as conn:
