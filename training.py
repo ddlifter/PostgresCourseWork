@@ -36,14 +36,17 @@ class Training(QWidget):
 
     def load_data_from_db(self):
         with self.conn as conn:
-            with conn.cursor() as cursor:
-                cursor.execute("SELECT * FROM training")  # Убедитесь, что имя таблицы верно
-                rows = cursor.fetchall()
-                self.table_widget.setRowCount(len(rows))
-                self.table_widget.setColumnCount(len(rows[0]))
-                for i, row in enumerate(rows):
-                    for j, value in enumerate(row):
-                        self.table_widget.setItem(i, j, QTableWidgetItem(str(value)))
+            with conn.cursor() as cur:
+                cur.callproc('employee_norm_training_data')
+                rows = cur.fetchall()
+                
+
+        self.table_widget.setRowCount(len(rows))
+        self.table_widget.setColumnCount(len(rows[0]))
+
+        for i, row in enumerate(rows):
+            for j, value in enumerate(row):
+                self.table_widget.setItem(i, j, QTableWidgetItem(str(value)))
 
     def open_add_dialog(self):
         dialog = AddTraining(self.conn)
@@ -59,7 +62,7 @@ class Training(QWidget):
                     return
                 employee_id = self.table_widget.item(selected_rows[0].row(), 0).text()  # Предполагается, что ID сотрудника находится в первом столбце
                 try:
-                    cursor.execute("DELETE FROM training WHERE id_employee = %s", (employee_id,))
+                    cursor.execute("DELETE FROM training WHERE id_training = %s", (employee_id,))
                     conn.commit()
                     QMessageBox.information(self, "Успех", "Строка успешно удалена.")
                     self.load_data_from_db()
