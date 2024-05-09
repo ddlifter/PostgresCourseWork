@@ -3,6 +3,7 @@ from employees import Employees
 from specialties import Specialties
 from norms import Norms
 from ranks import Ranks
+from training import Training
 from roles_changes import do_for_admin, do_for_empl
 import sys
 from connection import ConnectionManager
@@ -37,6 +38,12 @@ class MainForm(QMainWindow):
         self.button4.setGeometry(350, 50, 100, 30)
         self.button4.clicked.connect(self.open_form4)
         button_layout.addWidget(self.button4)
+        
+        
+        self.button5 = QPushButton("Обучение")
+        self.button5.setGeometry(350, 50, 100, 30)
+        self.button5.clicked.connect(self.open_form5)
+        button_layout.addWidget(self.button5)
 
         # Устанавливаем макет кнопок в качестве центрального виджета
         central_widget = QWidget()
@@ -61,6 +68,11 @@ class MainForm(QMainWindow):
     def open_form4(self):
         self.form4 = Ranks(self.conn)
         self.form4.show()
+        self.close()
+        
+    def open_form5(self):
+        self.form5 = Training(self.conn)
+        self.form5.show()
         self.close()
         
 class AuthorizationWindow(QWidget):
