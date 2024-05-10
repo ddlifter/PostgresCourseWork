@@ -38,7 +38,7 @@ class Employees(QWidget):
     def load_data_from_db(self):
         with self.conn as conn:
             with conn.cursor() as cur:
-                cur.callproc('select_employees')
+                cur.callproc('get_employee_specialties')
                 rows = cur.fetchall()
                 
 
