@@ -36,10 +36,16 @@ class Employees(QWidget):
         
 
     def load_data_from_db(self):
+        query = """
+            SELECT employees.surname, employees.name, specialties.name AS specialty, specialties.description
+            FROM employees
+            INNER JOIN specialties ON employees.id_specialty = specialties.id_specialty
+        """
         with self.conn as conn:
             with conn.cursor() as cur:
-                cur.callproc('get_employee_specialties')
+                cur.execute(query)
                 rows = cur.fetchall()
+
                 
 
         self.table_widget.setRowCount(len(rows))
