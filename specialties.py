@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QTableWidget, QTableWidgetItem, QMessageBox
 from connection import ConnectionManager
 from add_specialty import AddSpecialty
+from update_specialty import UpdateSpecialty
 
 class Specialties(QWidget):
     def __init__(self, conn: ConnectionManager, IsAdmin):
@@ -21,6 +22,10 @@ class Specialties(QWidget):
         self.show_data_button = QPushButton("Показать данные")
         self.show_data_button.clicked.connect(self.load_data_from_db)
         layout.addWidget(self.show_data_button)
+        
+        self.update_data_button = QPushButton("Обновить данные")
+        self.update_data_button.clicked.connect(self.open_update_dialog)
+        layout.addWidget(self.update_data_button)
         
         self.delete_button = QPushButton("Удалить")
         self.delete_button.clicked.connect(self.delete_selected_row)
@@ -66,3 +71,19 @@ class Specialties(QWidget):
                     self.load_data_from_db()
                 except Exception as e:
                     QMessageBox.critical(self, "Ошибка", f"Не удалось удалить строку: {str(e)}")
+                    
+    def open_update_dialog(self):
+        selected_rows = self.table_widget.selectionModel().selectedRows()
+        if not selected_rows:
+            QMessageBox.information(self, "Напоминание", "Выберите строку для обновления.")
+            return
+
+        selected_row_index = selected_rows[0].row()
+        spec_id = self.table_widget.item(selected_row_index, 0).text()
+        spec_name = self.table_widget.item(selected_row_index, 1).text()
+        description = self.table_widget.item(selected_row_index, 2).text()
+
+        dialog = UpdateSpecialty(self.conn, spec_id, spec_name, description)
+        if dialog.exec_():
+            self.load_data_from_db()
+
