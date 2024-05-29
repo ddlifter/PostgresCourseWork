@@ -1,6 +1,6 @@
-from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QWidget, QLabel, QLineEdit, QDialog, QMessageBox, QTableWidget, QTableWidgetItem
+from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QWidget, QLabel, QLineEdit, QDialog, QMessageBox, QTableWidget, QTableWidgetItem, QAbstractItemView
 import psycopg2
-
+from PyQt5.QtCore import Qt
 from connection import ConnectionManager
 from add_norm import AddNorm
 from update_norm import UpdateNorm  # Подключаем класс для окна обновления сотрудника
@@ -16,7 +16,10 @@ class Norms(QWidget):
         self.setLayout(layout)
         self.table_widget = QTableWidget()
         self.table_widget.setGeometry(50, 50, 500, 300)
-        
+
+        # Set the selection behavior to select entire rows
+        self.table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
+
         self.add_button = QPushButton("Добавить")
         self.add_button.clicked.connect(self.open_add_dialog)
         layout.addWidget(self.add_button)
@@ -24,21 +27,23 @@ class Norms(QWidget):
         self.show_data_button = QPushButton("Показать данные")
         self.show_data_button.clicked.connect(self.load_data_from_db)
         layout.addWidget(self.show_data_button)
-        
+
         self.update_button = QPushButton("Обновить")
         self.update_button.clicked.connect(self.open_update_dialog)
         layout.addWidget(self.update_button)
-        
+
         self.delete_button = QPushButton("Удалить")
         self.delete_button.clicked.connect(self.delete_selected_row)
         layout.addWidget(self.delete_button)
-        
+
         layout.addWidget(self.table_widget)
 
-        if IsAdmin != True:
+        if not IsAdmin:
             self.add_button.setEnabled(False)
             self.delete_button.setEnabled(False)
-        
+
+        # Load data from database and configure table
+        self.load_data_from_db()
 
     def load_data_from_db(self):
         query = """
@@ -56,21 +61,22 @@ class Norms(QWidget):
 
         for i, row in enumerate(rows):
             for j, value in enumerate(row):
-                self.table_widget.setItem(i, j, QTableWidgetItem(str(value)))
-
+                item = QTableWidgetItem(str(value))
+                # Make cells read-only
+                item.setFlags(item.flags() ^ Qt.ItemIsEditable)
+                self.table_widget.setItem(i, j, item)
 
     def open_add_dialog(self):
         dialog = AddNorm(self.conn)
         if dialog.exec_():
             self.load_data_from_db()
-            
-    
+
     def delete_selected_row(self):
         with self.conn as conn:
             with conn.cursor() as cursor:
                 selected_indexes = self.table_widget.selectionModel().selectedRows()
                 if not selected_indexes:
-                    QMessageBox.information(self, "Уведомление", "Выебрите строку для удаления.")
+                    QMessageBox.information(self, "Уведомление", "Выберите строку для удаления.")
                     return
 
                 index = selected_indexes[0]
@@ -82,24 +88,23 @@ class Norms(QWidget):
                     QMessageBox.information(self, "Успех", "Строка успешно удалена.")
                     self.load_data_from_db()
                 except Exception as e:
-                    QMessageBox.critical(self, "Error", f"Failed to delete row: {str(e)}")
+                    QMessageBox.critical(self, "Ошибка", f"Не удалось удалить строку: {str(e)}")
 
-                    
     def open_update_dialog(self):
         selected_indexes = self.table_widget.selectionModel().selectedRows()
         if not selected_indexes:
-            QMessageBox.information(self, "Reminder", "Select a row to update.")
+            QMessageBox.information(self, "Напоминание", "Выберите строку для обновления.")
             return
 
         selected_row_index = selected_indexes[0].row()
         surname = self.table_widget.item(selected_row_index, 0).text()
         name = self.table_widget.item(selected_row_index, 1).text()
-        
+
         with self.conn as conn:
             with conn.cursor() as cur:
                 cur.execute("SELECT id_norm FROM norms WHERE name = %s AND description = %s", (surname, name))
-                id_employee = cur.fetchone()[0]
+                id_norm = cur.fetchone()[0]
 
-        dialog = UpdateNorm(self.conn, id_employee, surname, name)
+        dialog = UpdateNorm(self.conn, id_norm, surname, name)
         if dialog.exec_():
             self.load_data_from_db()

@@ -1,7 +1,8 @@
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QTableWidget, QTableWidgetItem, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QTableWidget, QTableWidgetItem, QMessageBox, QAbstractItemView
 from connection import ConnectionManager
 from add_specialty import AddSpecialty
 from update_specialty import UpdateSpecialty
+from PyQt5.QtCore import Qt
 
 class Specialties(QWidget):
     def __init__(self, conn: ConnectionManager, IsAdmin):
@@ -14,7 +15,10 @@ class Specialties(QWidget):
         self.setLayout(layout)
         self.table_widget = QTableWidget()
         self.table_widget.setGeometry(50, 50, 500, 300)  # Установите размеры и позицию
-        
+
+        # Set the selection behavior to select entire rows
+        self.table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
+
         self.add_button = QPushButton("Добавить")
         self.add_button.clicked.connect(self.open_add_dialog)
         layout.addWidget(self.add_button)
@@ -37,19 +41,24 @@ class Specialties(QWidget):
             self.add_button.setEnabled(False)
             self.delete_button.setEnabled(False)
 
+        # Load data from database and configure table
+        self.load_data_from_db()
+
     def load_data_from_db(self):
         with self.conn as conn:
             with conn.cursor() as cur:
                 cur.callproc('select_specialties')
                 rows = cur.fetchall()
                 
-
         self.table_widget.setRowCount(len(rows))
         self.table_widget.setColumnCount(len(rows[0]) - 1)  # Уменьшаем количество столбцов на 1
         
         for i, row in enumerate(rows):
             for j, value in enumerate(row[1:]):  # Начинаем с первого элемента, чтобы пропустить id
-                self.table_widget.setItem(i, j, QTableWidgetItem(str(value)))
+                item = QTableWidgetItem(str(value))
+                # Make cells read-only
+                item.setFlags(item.flags() ^ Qt.ItemIsEditable)
+                self.table_widget.setItem(i, j, item)
 
     def open_add_dialog(self):
         dialog = AddSpecialty(self.conn)

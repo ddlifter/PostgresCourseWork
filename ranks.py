@@ -1,5 +1,6 @@
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QTableWidget, QTableWidgetItem, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QTableWidget, QTableWidgetItem, QMessageBox, QAbstractItemView
 from connection import ConnectionManager
+from PyQt5.QtCore import Qt
 from add_rank import AddRank
 from update_rank import UpdateRank  # Подключаем класс для окна обновления разряда
 
@@ -14,7 +15,10 @@ class Ranks(QWidget):
         self.setLayout(layout)
         self.table_widget = QTableWidget()
         self.table_widget.setGeometry(50, 50, 500, 300)  # Установите размеры и позицию
-        
+
+        # Set the selection behavior to select entire rows
+        self.table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
+
         self.add_button = QPushButton("Добавить")
         self.add_button.clicked.connect(self.open_add_dialog)
         layout.addWidget(self.add_button)
@@ -37,6 +41,9 @@ class Ranks(QWidget):
             self.add_button.setEnabled(False)
             self.delete_button.setEnabled(False)
 
+        # Load data from database and configure table
+        self.load_data_from_db()
+
     def load_data_from_db(self):
         with self.conn as conn:
             with conn.cursor() as cursor:
@@ -46,7 +53,10 @@ class Ranks(QWidget):
                 self.table_widget.setColumnCount(len(rows[0]))
                 for i, row in enumerate(rows):
                     for j, value in enumerate(row):
-                        self.table_widget.setItem(i, j, QTableWidgetItem(str(value)))
+                        item = QTableWidgetItem(str(value))
+                        # Make cells read-only
+                        item.setFlags(item.flags() ^ Qt.ItemIsEditable)
+                        self.table_widget.setItem(i, j, item)
 
     def open_add_dialog(self):
         dialog = AddRank(self.conn)
@@ -61,10 +71,10 @@ class Ranks(QWidget):
                     QMessageBox.information(self, "Уведомление", "Выберите строку для удаления.")
                     return
                 # Определяем id по другим полям (например, по названию разряда)
-                rank_name = self.table_widget.item(selected_rows[0].row(), 1).text()
-                description = self.table_widget.item(selected_rows[0].row(), 2).text()
+                rank_name = self.table_widget.item(selected_rows[0].row(), 0).text()
+                description = self.table_widget.item(selected_rows[0].row(), 1).text()
                 try:
-                    cursor.execute("DELETE FROM ranks WHERE rank_name = %s AND description = %s", (rank_name, description))
+                    cursor.execute("DELETE FROM ranks WHERE name = %s AND description = %s", (rank_name, description))
                     conn.commit()
                     QMessageBox.information(self, "Успех", "Строка успешно удалена.")
                     self.load_data_from_db()
