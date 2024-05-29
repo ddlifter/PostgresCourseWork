@@ -3,6 +3,8 @@ from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLi
 import psycopg2
 from connection import ConnectionManager
 
+from PyQt5.QtCore import Qt
+
 class AddEmployee(QDialog):
     def __init__(self, conn: ConnectionManager):
         super().__init__()
@@ -14,12 +16,14 @@ class AddEmployee(QDialog):
         self.surname_label = QLabel("SurName:")
         self.surname_input = QLineEdit()
         self.surname_input.setReadOnly(False)
+        self.surname_input.textChanged.connect(self.check_inputs)  # Проверка фамилии при изменении текста
         layout.addWidget(self.surname_label)
         layout.addWidget(self.surname_input)
 
         self.name_label = QLabel("Name:")
         self.name_input = QLineEdit()
         self.name_input.setReadOnly(False)
+        self.name_input.textChanged.connect(self.check_inputs)  # Проверка имени при изменении текста
         layout.addWidget(self.name_label)
         layout.addWidget(self.name_input)
 
@@ -35,7 +39,21 @@ class AddEmployee(QDialog):
         layout.addWidget(self.specialtyLabel)
         layout.addWidget(self.specialtyCombo)
 
+        # Добавим кнопку "Submit" и сделаем ее неактивной изначально
+        self.submit_button.setEnabled(False)
+
+    def check_inputs(self):
+        surname = self.surname_input.text().strip()
+        name = self.name_input.text().strip()
+
+        # Проверяем, что оба поля не пустые и не содержат цифры
+        if surname and name and surname.isalpha() and name.isalpha():
+            self.submit_button.setEnabled(True)
+        else:
+            self.submit_button.setEnabled(False)
+
     def submit_data(self):
+        # Оставляем ваш существующий код без изменений
         with self.conn as conn:
             with conn.cursor() as cur:
                 name = self.name_input.text()
@@ -52,6 +70,7 @@ class AddEmployee(QDialog):
                     print(f"Ошибка при добавлении сотрудника: {e}")
             
     def loadSpecialties(self):
+        # Оставляем ваш существующий код без изменений
         with self.conn as conn:
             with conn.cursor() as cur:
                 try:
@@ -62,3 +81,4 @@ class AddEmployee(QDialog):
                     cur.close()
                 except Exception as e:
                     print(f"Ошибка при загрузке специальностей: {e}")
+

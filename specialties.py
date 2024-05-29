@@ -86,7 +86,7 @@ class Specialties(QWidget):
                 # Определяем id по другим полям (например, по названию специальности)
                 spec_name = self.table_widget.item(selected_rows[0].row(), 0).text()
                 try:
-                    cursor.execute("DELETE FROM specialties WHERE specialty_name = %s", (spec_name,))
+                    cursor.execute("DELETE FROM specialties WHERE name = %s", (spec_name,))
                     conn.commit()
                     QMessageBox.information(self, "Успех", "Строка успешно удалена.")
                     self.load_data_from_db()

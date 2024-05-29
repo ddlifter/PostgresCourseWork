@@ -62,6 +62,11 @@ class Training(QWidget):
                 cur.execute("SELECT e.surname, n.name, t.data FROM training t JOIN employees e ON t.id_employee = e.id_employee JOIN norms n ON t.id_norm = n.id_norm")
                 rows = cur.fetchall()
 
+        self.table_widget.clear()  # Очищаем таблицу перед загрузкой новых данных
+
+        if not rows:
+            return
+
         self.table_widget.setRowCount(len(rows))
         self.table_widget.setColumnCount(len(rows[0]))
 
@@ -70,6 +75,7 @@ class Training(QWidget):
                 item = QTableWidgetItem(str(value))
                 item.setFlags(item.flags() ^ Qt.ItemIsEditable)  # Запретить редактирование ячеек
                 self.table_widget.setItem(i, j, item)
+
 
     def open_add_dialog(self):
         dialog = AddTraining(self.conn)
@@ -129,9 +135,16 @@ class Training(QWidget):
             return
 
         selected_row_index = selected_rows[0].row()
-        surname = self.table_widget.item(selected_row_index, 0).text()
-        norm = self.table_widget.item(selected_row_index, 1).text()
-        date = self.table_widget.item(selected_row_index, 2).text()
+        surname_item = self.table_widget.item(selected_row_index, 0)
+        norm_item = self.table_widget.item(selected_row_index, 1)
+        date_item = self.table_widget.item(selected_row_index, 2)
+
+        if not all([surname_item, norm_item, date_item]):
+            return  # Если выбранные элементы ячеек пусты, просто выходим
+
+        surname = surname_item.text()
+        norm = norm_item.text()
+        date = date_item.text()
 
         with self.conn as conn:
             with conn.cursor() as cursor:
@@ -139,6 +152,8 @@ class Training(QWidget):
                     cursor.execute("DELETE FROM training WHERE id_employee IN (SELECT id_employee FROM employees WHERE surname = %s) AND id_norm IN (SELECT id_norm FROM norms WHERE name = %s) AND data = %s", (surname, norm, date))
                     conn.commit()
                     QMessageBox.information(self, "Успех", "Строка успешно удалена.")
+                    
                     self.load_data_from_db()
+                     
                 except Exception as e:
                     QMessageBox.critical(self, "Ошибка", f"Не удалось удалить строку: {str(e)}")

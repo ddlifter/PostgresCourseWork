@@ -15,12 +15,14 @@ class AddNorm(QDialog):
         self.name_label = QLabel("Name:")
         self.name_input = QLineEdit()
         self.name_input.setReadOnly(False)
+        self.name_input.textChanged.connect(self.check_inputs)
         layout.addWidget(self.name_label)
         layout.addWidget(self.name_input)
 
         self.surname_label = QLabel("Description:")
         self.surname_input = QLineEdit()
         self.surname_input.setReadOnly(False)
+        self.surname_input.textChanged.connect(self.check_inputs)
         layout.addWidget(self.surname_label)
         layout.addWidget(self.surname_input)
 
@@ -36,7 +38,16 @@ class AddNorm(QDialog):
 
         self.setLayout(layout)
         
+        self.submit_button.setEnabled(False)
         
+    def check_inputs(self):
+        surname = self.surname_input.text().strip()
+        name = self.name_input.text().strip()
+
+        if surname and name and surname.isalpha() and name.isalpha():
+            self.submit_button.setEnabled(True)
+        else:
+            self.submit_button.setEnabled(False)
 
     def submit_data(self):
         with self.conn as conn:
