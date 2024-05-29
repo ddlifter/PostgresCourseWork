@@ -46,6 +46,11 @@ class MainForm(QMainWindow):
         self.button4.clicked.connect(self.open_form4)
         grid_layout.addWidget(self.button4, 2, 0)
 
+        # Добавляем кнопку "Выйти"
+        self.logout_button = QPushButton("Выйти")
+        self.logout_button.clicked.connect(self.open_login_form)  # Подключаем метод для открытия окна авторизации
+        grid_layout.addWidget(self.logout_button, 2, 1)
+
         # Устанавливаем сетку в качестве центрального виджета
         central_widget = QWidget()
         central_widget.setLayout(grid_layout)
@@ -74,6 +79,12 @@ class MainForm(QMainWindow):
     def open_form4(self):
         self.form4 = Ranks(self.conn, IsAdmin)
         self.form4.show()
+        self.close()
+
+    def open_login_form(self):
+        # Открываем окно авторизации
+        self.login_form = AuthorizationWindow()
+        self.login_form.show()
         self.close()
 
 class AuthorizationWindow(QWidget):
