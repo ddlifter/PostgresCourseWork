@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QTableWidget, QTableWidgetItem, QMessageBox
 from connection import ConnectionManager
 from add_rank import AddRank
+from update_rank import UpdateRank  # Подключаем класс для окна обновления разряда
 
 class Ranks(QWidget):
     def __init__(self, conn: ConnectionManager, IsAdmin):
@@ -22,6 +23,10 @@ class Ranks(QWidget):
         self.show_data_button.clicked.connect(self.load_data_from_db)
         layout.addWidget(self.show_data_button)
         
+        self.update_button = QPushButton("Обновить")
+        self.update_button.clicked.connect(self.open_update_dialog)
+        layout.addWidget(self.update_button)
+        
         self.delete_button = QPushButton("Удалить")
         self.delete_button.clicked.connect(self.delete_selected_row)
         layout.addWidget(self.delete_button)
@@ -35,7 +40,7 @@ class Ranks(QWidget):
     def load_data_from_db(self):
         with self.conn as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT * FROM ranks")  # Убедитесь, что имя таблицы верно
+                cursor.execute("SELECT name, description FROM ranks")
                 rows = cursor.fetchall()
                 self.table_widget.setRowCount(len(rows))
                 self.table_widget.setColumnCount(len(rows[0]))
@@ -55,11 +60,33 @@ class Ranks(QWidget):
                 if not selected_rows:
                     QMessageBox.information(self, "Уведомление", "Выберите строку для удаления.")
                     return
-                rank_id = self.table_widget.item(selected_rows[0].row(), 0).text()  # Предполагается, что ID сотрудника находится в первом столбце
+                # Определяем id по другим полям (например, по названию разряда)
+                rank_name = self.table_widget.item(selected_rows[0].row(), 1).text()
+                description = self.table_widget.item(selected_rows[0].row(), 2).text()
                 try:
-                    cursor.execute("DELETE FROM ranks WHERE id_rank = %s", (rank_id,))
+                    cursor.execute("DELETE FROM ranks WHERE rank_name = %s AND description = %s", (rank_name, description))
                     conn.commit()
                     QMessageBox.information(self, "Успех", "Строка успешно удалена.")
                     self.load_data_from_db()
                 except Exception as e:
                     QMessageBox.critical(self, "Ошибка", f"Не удалось удалить строку: {str(e)}")
+                    
+    def open_update_dialog(self):
+        selected_rows = self.table_widget.selectionModel().selectedRows()
+        if not selected_rows:
+            QMessageBox.information(self, "Напоминание", "Выберите строку для обновления.")
+            return
+
+        selected_row_index = selected_rows[0].row()
+        rank_name = self.table_widget.item(selected_row_index, 0).text()
+        description = self.table_widget.item(selected_row_index, 1).text()
+        
+        # Запрос id_rank из базы данных по name и description
+        with self.conn as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT id_rank FROM ranks WHERE name = %s AND description = %s", (rank_name, description))
+                id_rank = cur.fetchone()[0]  # Получаем первый элемент первой строки (предполагается, что будет только одна строка)
+
+        dialog = UpdateRank(self.conn, id_rank, rank_name, description)  # Передаем id_rank в UpdateRank
+        if dialog.exec_():
+            self.load_data_from_db()
