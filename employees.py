@@ -12,7 +12,7 @@ class Employees(QWidget):
         self.conn: ConnectionManager = conn
         self.showMaximized()
         layout = QVBoxLayout()
-        self.setWindowTitle("Employees")
+        self.setWindowTitle("Сотрудники")
         self.setGeometry(100, 100, 600, 400)
         self.setLayout(layout)
         self.table_widget = QTableWidget()
@@ -21,19 +21,19 @@ class Employees(QWidget):
         # Set the selection behavior to select entire rows
         self.table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
 
-        self.add_button = QPushButton("Add")
+        self.add_button = QPushButton("Добавить сотрудника")
         self.add_button.clicked.connect(self.open_add_dialog)
         layout.addWidget(self.add_button)
 
-        self.show_data_button = QPushButton("Show Data")
+        self.show_data_button = QPushButton("Показать данные")
         self.show_data_button.clicked.connect(self.load_data_from_db)
         layout.addWidget(self.show_data_button)
 
-        self.update_button = QPushButton("Update")
+        self.update_button = QPushButton("Обновить")
         self.update_button.clicked.connect(self.open_update_dialog)
         layout.addWidget(self.update_button)
 
-        self.delete_button = QPushButton("Delete")
+        self.delete_button = QPushButton("Удалить")
         self.delete_button.clicked.connect(self.delete_selected_row)
         layout.addWidget(self.delete_button)
         
@@ -47,9 +47,9 @@ class Employees(QWidget):
             self.add_button.setEnabled(False)
             self.delete_button.setEnabled(False)
             self.update_button.setEnabled(False)
+            self.show_data_button.setEnabled(False)
 
-        # Load data from database and configure table
-        #self.load_data_from_db()
+        self.load_data_from_db()
         
         
     def go_to_main_window(self):
@@ -87,7 +87,7 @@ class Employees(QWidget):
             with conn.cursor() as cursor:
                 selected_indexes = self.table_widget.selectionModel().selectedRows()
                 if not selected_indexes:
-                    QMessageBox.information(self, "Notification", "Select a row to delete.")
+                    QMessageBox.information(self, "Уведомление", "Выберите строку для удаления.")
                     return
 
                 index = selected_indexes[0]
@@ -96,15 +96,15 @@ class Employees(QWidget):
                 try:
                     cursor.execute("DELETE FROM employees WHERE surname = %s AND name = %s", (surname, name))
                     conn.commit()
-                    QMessageBox.information(self, "Success", "Row successfully deleted.")
+                    QMessageBox.information(self, "Успех", "Строка успешно удалена.")
                     self.load_data_from_db()
                 except Exception as e:
-                    QMessageBox.critical(self, "Error", f"Failed to delete row: {str(e)}")
+                    QMessageBox.critical(self, "Ошибка", f"Не удалось удалить строку: {str(e)}")
 
     def open_update_dialog(self):
         selected_indexes = self.table_widget.selectionModel().selectedRows()
         if not selected_indexes:
-            QMessageBox.information(self, "Reminder", "Select a row to update.")
+            QMessageBox.information(self, "Уведомление", "Выберите строку для обновления.")
             return
 
         selected_row_index = selected_indexes[0].row()

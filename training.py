@@ -44,6 +44,10 @@ class Training(QWidget):
             self.add_button.setEnabled(False)
             self.delete_button.setEnabled(False)
             self.update_data_button.setEnabled(False)
+            self.show_data_button.setEnabled(False)
+            
+        self.load_data_from_db()
+
             
         self.table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.table_widget.itemSelectionChanged.connect(self.open_update_dialog)

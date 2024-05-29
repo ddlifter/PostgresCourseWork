@@ -46,6 +46,7 @@ class Specialties(QWidget):
             self.add_button.setEnabled(False)
             self.delete_button.setEnabled(False)
             self.update_data_button.setEnabled(False)
+            self.show_data_button.setEnabled(False)
 
         # Load data from database and configure table
         self.load_data_from_db()
