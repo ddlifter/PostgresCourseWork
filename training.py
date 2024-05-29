@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QWidget, QLabel, QLineEdit, QDialog, QMessageBox, QTableWidget, QTableWidgetItem, QAbstractItemView
 import psycopg2
-
+from PyQt5.QtCore import Qt
 from connection import ConnectionManager
 from add_training import AddTraining
 from update_training import UpdateTraining
@@ -53,7 +53,9 @@ class Training(QWidget):
 
         for i, row in enumerate(rows):
             for j, value in enumerate(row):
-                self.table_widget.setItem(i, j, QTableWidgetItem(str(value)))
+                item = QTableWidgetItem(str(value))
+                item.setFlags(item.flags() ^ Qt.ItemIsEditable)  # Запретить редактирование ячеек
+                self.table_widget.setItem(i, j, item)
 
     def open_add_dialog(self):
         dialog = AddTraining(self.conn)
