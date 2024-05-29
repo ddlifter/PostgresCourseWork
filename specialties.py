@@ -33,7 +33,7 @@ class Specialties(QWidget):
         
         layout.addWidget(self.table_widget)
         
-        if IsAdmin != True:
+        if not IsAdmin:
             self.add_button.setEnabled(False)
             self.delete_button.setEnabled(False)
 
@@ -45,10 +45,10 @@ class Specialties(QWidget):
                 
 
         self.table_widget.setRowCount(len(rows))
-        self.table_widget.setColumnCount(len(rows[0]))
-
+        self.table_widget.setColumnCount(len(rows[0]) - 1)  # Уменьшаем количество столбцов на 1
+        
         for i, row in enumerate(rows):
-            for j, value in enumerate(row):
+            for j, value in enumerate(row[1:]):  # Начинаем с первого элемента, чтобы пропустить id
                 self.table_widget.setItem(i, j, QTableWidgetItem(str(value)))
 
     def open_add_dialog(self):
@@ -63,9 +63,10 @@ class Specialties(QWidget):
                 if not selected_rows:
                     QMessageBox.information(self, "Уведомление", "Выберите строку для удаления.")
                     return
-                spec_id = self.table_widget.item(selected_rows[0].row(), 0).text()  # Предполагается, что ID сотрудника находится в первом столбце
+                # Определяем id по другим полям (например, по названию специальности)
+                spec_name = self.table_widget.item(selected_rows[0].row(), 0).text()
                 try:
-                    cursor.execute("DELETE FROM specialties WHERE id_specialty = %s", (spec_id,))
+                    cursor.execute("DELETE FROM specialties WHERE specialty_name = %s", (spec_name,))
                     conn.commit()
                     QMessageBox.information(self, "Успех", "Строка успешно удалена.")
                     self.load_data_from_db()
@@ -79,11 +80,15 @@ class Specialties(QWidget):
             return
 
         selected_row_index = selected_rows[0].row()
-        spec_id = self.table_widget.item(selected_row_index, 0).text()
-        spec_name = self.table_widget.item(selected_row_index, 1).text()
-        description = self.table_widget.item(selected_row_index, 2).text()
+        spec_name = self.table_widget.item(selected_row_index, 0).text()
+        description = self.table_widget.item(selected_row_index, 1).text()
+        
+        # Запрос id_specialty из базы данных по name и description
+        with self.conn as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT id_specialty FROM specialties WHERE name = %s AND description = %s", (spec_name, description))
+                id_specialty = cur.fetchone()[0]  # Получаем первый элемент первой строки (предполагается, что будет только одна строка)
 
-        dialog = UpdateSpecialty(self.conn, spec_id, spec_name, description)
+        dialog = UpdateSpecialty(self.conn, id_specialty, spec_name, description)  # Передаем id_specialty в UpdateSpecialty
         if dialog.exec_():
             self.load_data_from_db()
-
