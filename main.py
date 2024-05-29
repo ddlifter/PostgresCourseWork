@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QGridLayout, QWidget, QLabel, QVBoxLayout, QLineEdit, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QLineEdit, QMessageBox
 from employees import Employees
 from specialties import Specialties
 from norms import Norms
@@ -8,52 +8,48 @@ import sys
 from connection import ConnectionManager
 from PyQt5.QtCore import Qt  
 
-
 IsAdmin = True
 
 class MainForm(QMainWindow):
     def __init__(self, conn: ConnectionManager, IsAdmin):
         self.conn : ConnectionManager = conn
         super().__init__()
-        self.setWindowTitle("Main Form")
+        self.setWindowTitle("Главное меню")
         self.setGeometry(100, 100, 600, 400)
-        self.showMaximized()
 
-        # Создаем сетку для размещения кнопок
-        grid_layout = QGridLayout()
+        # Создаем вертикальный layout для размещения кнопок
+        layout = QVBoxLayout()
 
-        # Кнопка Обучение в центре
+        # Кнопка "Обучение" - акцентированная
         self.training_button = QPushButton("Обучение (основная)")
         self.training_button.clicked.connect(self.open_training_form)
-        self.training_label = QLabel("При нажатии переходит к редактированию обучений.")
-        grid_layout.addWidget(self.training_label, 0, 0, alignment=Qt.AlignCenter)
-        grid_layout.addWidget(self.training_button, 0, 1, alignment=Qt.AlignCenter)
+        self.training_button.setStyleSheet("background-color: #4CAF50; color: white; border: none; padding: 10px 24px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer;")
+        layout.addWidget(self.training_button)
 
-        # Остальные кнопки внизу
-        self.button1 = QPushButton("Сотрудники")
-        self.button1.clicked.connect(self.open_form1)
-        grid_layout.addWidget(self.button1, 1, 0)
-
-        self.button2 = QPushButton("Специальности")
-        self.button2.clicked.connect(self.open_form2)
-        grid_layout.addWidget(self.button2, 1, 1)
-
-        self.button3 = QPushButton("Нормы")
-        self.button3.clicked.connect(self.open_form3)
-        grid_layout.addWidget(self.button3, 1, 2)
-
-        self.button4 = QPushButton("Разряды")
-        self.button4.clicked.connect(self.open_form4)
-        grid_layout.addWidget(self.button4, 2, 0)
-
-        # Добавляем кнопку "Выйти"
+        # Кнопка "Выйти" рядом с кнопкой "Обучение"
         self.logout_button = QPushButton("Выйти")
-        self.logout_button.clicked.connect(self.open_login_form)  # Подключаем метод для открытия окна авторизации
-        grid_layout.addWidget(self.logout_button, 2, 1)
+        self.logout_button.clicked.connect(self.open_login_form)
+        layout.addWidget(self.logout_button)
 
-        # Устанавливаем сетку в качестве центрального виджета
+        # Отдельный блок для остальных кнопок
+        other_buttons_layout = QVBoxLayout()
+
+        # Кнопки для различных форм
+        buttons_info = [("Сотрудники", self.open_form1),
+                        ("Специальности", self.open_form2),
+                        ("Нормы", self.open_form3),
+                        ("Разряды", self.open_form4)]
+        for text, function in buttons_info:
+            button = QPushButton(text)
+            button.clicked.connect(function)
+            other_buttons_layout.addWidget(button)
+
+        # Добавляем блок с остальными кнопками в основной layout
+        layout.addLayout(other_buttons_layout)
+
+        # Устанавливаем layout в качестве центрального виджета
         central_widget = QWidget()
-        central_widget.setLayout(grid_layout)
+        central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
 
     def open_training_form(self):
@@ -82,7 +78,6 @@ class MainForm(QMainWindow):
         self.close()
 
     def open_login_form(self):
-        # Открываем окно авторизации
         self.login_form = AuthorizationWindow()
         self.login_form.show()
         self.close()

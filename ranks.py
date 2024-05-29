@@ -56,18 +56,27 @@ class Ranks(QWidget):
         self.close()
 
     def load_data_from_db(self):
+        query = """
+            SELECT name, description FROM ranks
+        """
         with self.conn as conn:
-            with conn.cursor() as cursor:
-                cursor.execute("SELECT name, description FROM ranks")
-                rows = cursor.fetchall()
-                self.table_widget.setRowCount(len(rows))
-                self.table_widget.setColumnCount(len(rows[0]))
-                for i, row in enumerate(rows):
-                    for j, value in enumerate(row):
-                        item = QTableWidgetItem(str(value))
-                        # Make cells read-only
-                        item.setFlags(item.flags() ^ Qt.ItemIsEditable)
-                        self.table_widget.setItem(i, j, item)
+            with conn.cursor() as cur:
+                cur.execute(query)
+                rows = cur.fetchall()
+
+        if not rows:
+            self.table_widget.hide()
+            return
+
+        self.table_widget.show()
+        self.table_widget.setRowCount(len(rows))
+        self.table_widget.setColumnCount(len(rows[0]))
+
+        for i, row in enumerate(rows):
+            for j, value in enumerate(row):
+                item = QTableWidgetItem(str(value))
+                item.setFlags(item.flags() ^ Qt.ItemIsEditable)
+                self.table_widget.setItem(i, j, item)
 
     def open_add_dialog(self):
         dialog = AddRank(self.conn)

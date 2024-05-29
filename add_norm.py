@@ -8,7 +8,6 @@ class AddNorm(QDialog):
         super().__init__()
         self.conn : ConnectionManager = conn
 
-
         self.setWindowTitle("Add Data")
         layout = QVBoxLayout()
         
@@ -71,8 +70,13 @@ class AddNorm(QDialog):
                 try:
                     cur.execute("SELECT id_rank, name FROM ranks")
                     specialties = cur.fetchall()
-                    for specialty in specialties:
-                        self.specialtyCombo.addItem(specialty[1], specialty[0])
+                    if not specialties:
+                        QMessageBox.warning(self, "Отсутствуют разряды", "Нет доступных разрядов. Пожалуйста, добавьте разряды.")
+                        self.reject()
+                    else:
+                        for specialty in specialties:
+                            self.specialtyCombo.addItem(specialty[1], specialty[0])
                     cur.close()
                 except Exception as e:
                     print(f"Ошибка при загрузке разрядов: {e}")
+

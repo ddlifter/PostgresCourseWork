@@ -10,37 +10,40 @@ class Norms(QWidget):
         self.main_form = main_form
         super().__init__()
         self.conn: ConnectionManager = conn
-        self.showMaximized()
-        layout = QVBoxLayout()
+        layout = QVBoxLayout(self)
         self.setWindowTitle("Нормы")
         self.setGeometry(100, 100, 600, 400)
-        self.setLayout(layout)
-        self.table_widget = QTableWidget()
-        self.table_widget.setGeometry(50, 50, 500, 300)
+        
 
-        # Set the selection behavior to select entire rows
-        self.table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        # Создаем вертикальный layout для кнопок
+        button_layout = QVBoxLayout()
 
         self.add_button = QPushButton("Добавить")
         self.add_button.clicked.connect(self.open_add_dialog)
-        layout.addWidget(self.add_button)
+        button_layout.addWidget(self.add_button)
 
         self.show_data_button = QPushButton("Показать данные")
         self.show_data_button.clicked.connect(self.load_data_from_db)
-        layout.addWidget(self.show_data_button)
+        button_layout.addWidget(self.show_data_button)
 
         self.update_button = QPushButton("Обновить")
         self.update_button.clicked.connect(self.open_update_dialog)
-        layout.addWidget(self.update_button)
+        button_layout.addWidget(self.update_button)
 
         self.delete_button = QPushButton("Удалить")
         self.delete_button.clicked.connect(self.delete_selected_row)
-        layout.addWidget(self.delete_button)
+        button_layout.addWidget(self.delete_button)
         
         self.back_button = QPushButton("Вернуться на главное окно")  # Создаем кнопку
         self.back_button.clicked.connect(self.go_to_main_window)  # Подключаем метод
-        layout.addWidget(self.back_button)
+        button_layout.addWidget(self.back_button)
 
+        layout.addLayout(button_layout)
+
+        # Создаем виджет таблицы и настраиваем его
+        self.table_widget = QTableWidget()
+        self.table_widget.setGeometry(50, 50, 500, 300)
+        self.table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
         layout.addWidget(self.table_widget)
 
         if not IsAdmin:
@@ -49,7 +52,7 @@ class Norms(QWidget):
             self.update_button.setEnabled(False)
             self.show_data_button.setEnabled(False)
 
-        # Load data from database and configure table
+        # Загружаем данные из базы данных и настраиваем таблицу
         self.load_data_from_db()
         
     def go_to_main_window(self):
@@ -60,46 +63,52 @@ class Norms(QWidget):
         query = """
             SELECT norms.name, norms.description, ranks.name AS rank, ranks.description
             FROM norms
-            INNER JOIN ranks ON norms.id_rank = ranks.id_rank
+            LEFT JOIN ranks ON norms.id_rank = ranks.id_rank
         """
         with self.conn as conn:
             with conn.cursor() as cur:
                 cur.execute(query)
                 rows = cur.fetchall()
 
+        if not rows:
+            self.table_widget.hide()
+            return
+
+        self.table_widget.show()
         self.table_widget.setRowCount(len(rows))
         self.table_widget.setColumnCount(len(rows[0]))
 
         for i, row in enumerate(rows):
             for j, value in enumerate(row):
                 item = QTableWidgetItem(str(value))
-                # Make cells read-only
                 item.setFlags(item.flags() ^ Qt.ItemIsEditable)
                 self.table_widget.setItem(i, j, item)
 
     def open_add_dialog(self):
-        dialog = AddNorm(self.conn)
-        if dialog.exec_():
-            self.load_data_from_db()
-
-    def delete_selected_row(self):
         with self.conn as conn:
             with conn.cursor() as cursor:
-                selected_indexes = self.table_widget.selectionModel().selectedRows()
-                if not selected_indexes:
-                    QMessageBox.information(self, "Уведомление", "Выберите строку для удаления.")
-                    return
+                cursor.execute("SELECT COUNT(*) FROM ranks")
+                count = cursor.fetchone()[0]
 
-                index = selected_indexes[0]
-                surname = self.table_widget.item(index.row(), 0).text()
-                name = self.table_widget.item(index.row(), 1).text()
-                try:
-                    cursor.execute("DELETE FROM norms WHERE name = %s AND description = %s", (surname, name))
-                    conn.commit()
-                    QMessageBox.information(self, "Успех", "Строка успешно удалена.")
-                    self.load_data_from_db()
-                except Exception as e:
-                    QMessageBox.critical(self, "Ошибка", f"Не удалось удалить строку: {str(e)}")
+                if count == 0:
+                    QMessageBox.warning(self, "Нет разрядов", "В таблице Разряды нет записей, сперва добавьте информацию о разрядах.")
+                else:
+                    dialog = AddNorm(self.conn)
+                    if dialog.exec_():
+                        self.load_data_from_db()
+
+    def delete_selected_row(self):
+        selected_indexes = self.table_widget.selectionModel().selectedRows()
+        if not selected_indexes:
+            QMessageBox.information(self, "Уведомление", "Выберите строку для удаления.")
+            return
+
+        with self.conn as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("DELETE FROM norms WHERE name = %s AND description = %s", (self.table_widget.item(selected_indexes[0].row(), 0).text(), self.table_widget.item(selected_indexes[0].row(), 1).text()))
+                conn.commit()
+
+        self.load_data_from_db()
 
     def open_update_dialog(self):
         selected_indexes = self.table_widget.selectionModel().selectedRows()

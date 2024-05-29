@@ -55,32 +55,47 @@ class Employees(QWidget):
     def go_to_main_window(self):
         self.main_form.show()
         self.close()
+        
+        
 
     def load_data_from_db(self):
         query = """
             SELECT employees.surname, employees.name, specialties.name AS specialty, specialties.description
             FROM employees
-            INNER JOIN specialties ON employees.id_specialty = specialties.id_specialty
+            LEFT JOIN specialties ON employees.id_specialty = specialties.id_specialty
         """
         with self.conn as conn:
             with conn.cursor() as cur:
                 cur.execute(query)
                 rows = cur.fetchall()
 
+        if not rows:
+            self.table_widget.hide()
+            return
+
+        self.table_widget.show()
         self.table_widget.setRowCount(len(rows))
         self.table_widget.setColumnCount(len(rows[0]))
 
         for i, row in enumerate(rows):
             for j, value in enumerate(row):
                 item = QTableWidgetItem(str(value))
-                # Make cells read-only
                 item.setFlags(item.flags() ^ Qt.ItemIsEditable)
                 self.table_widget.setItem(i, j, item)
 
     def open_add_dialog(self):
-        dialog = AddEmployee(self.conn)
-        if dialog.exec_():
-            self.load_data_from_db()
+        with self.conn as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT COUNT(*) FROM specialties")
+                count = cursor.fetchone()[0]
+
+                if count == 0:
+                    QMessageBox.warning(self, "Нет специальностей", "В таблице Специальности нет записей, сперва добавьте информацию о специальностях.")
+                else:
+                    dialog = AddEmployee(self.conn)
+                    if dialog.exec_():
+                        self.load_data_from_db()
+
 
     def delete_selected_row(self):
         with self.conn as conn:

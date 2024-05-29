@@ -56,18 +56,25 @@ class Specialties(QWidget):
         self.close()
 
     def load_data_from_db(self):
+        query = """
+            SELECT name, description FROM specialties
+        """
         with self.conn as conn:
             with conn.cursor() as cur:
-                cur.callproc('select_specialties')
+                cur.execute(query)
                 rows = cur.fetchall()
-                
+
+        if not rows:
+            self.table_widget.hide()
+            return
+
+        self.table_widget.show()
         self.table_widget.setRowCount(len(rows))
-        self.table_widget.setColumnCount(len(rows[0]) - 1)  # Уменьшаем количество столбцов на 1
-        
+        self.table_widget.setColumnCount(len(rows[0]))
+
         for i, row in enumerate(rows):
-            for j, value in enumerate(row[1:]):  # Начинаем с первого элемента, чтобы пропустить id
+            for j, value in enumerate(row):
                 item = QTableWidgetItem(str(value))
-                # Make cells read-only
                 item.setFlags(item.flags() ^ Qt.ItemIsEditable)
                 self.table_widget.setItem(i, j, item)
 
