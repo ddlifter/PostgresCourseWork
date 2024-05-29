@@ -79,6 +79,8 @@ class Specialties(QWidget):
                 item = QTableWidgetItem(str(value))
                 item.setFlags(item.flags() ^ Qt.ItemIsEditable)
                 self.table_widget.setItem(i, j, item)
+                
+        self.table_widget.resizeColumnsToContents()
 
     def open_add_dialog(self):
         dialog = AddSpecialty(self.conn)

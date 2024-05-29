@@ -77,6 +77,8 @@ class Training(QWidget):
                 item = QTableWidgetItem(str(value))
                 item.setFlags(item.flags() ^ Qt.ItemIsEditable)  # Запретить редактирование ячеек
                 self.table_widget.setItem(i, j, item)
+                
+        self.table_widget.resizeColumnsToContents()
 
 
     def open_add_dialog(self):
