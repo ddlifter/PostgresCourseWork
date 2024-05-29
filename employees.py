@@ -3,6 +3,7 @@ import psycopg2
 
 from connection import ConnectionManager
 from add_employee import AddEmployee
+from update_employee import UpdateEmployee  # Подключаем класс для окна обновления сотрудника
 
 class Employees(QWidget):
     def __init__(self, conn: ConnectionManager, IsAdmin):
@@ -10,21 +11,25 @@ class Employees(QWidget):
         self.conn: ConnectionManager = conn
         self.showMaximized()
         layout = QVBoxLayout()
-        self.setWindowTitle("Сотрудники")
+        self.setWindowTitle("Employees")
         self.setGeometry(100, 100, 600, 400)
         self.setLayout(layout)
         self.table_widget = QTableWidget()
-        self.table_widget.setGeometry(50, 50, 500, 300)  # Установите размеры и позицию
+        self.table_widget.setGeometry(50, 50, 500, 300)
         
-        self.add_button = QPushButton("Добавить")
+        self.add_button = QPushButton("Add")
         self.add_button.clicked.connect(self.open_add_dialog)
         layout.addWidget(self.add_button)
 
-        self.show_data_button = QPushButton("Показать данные")
+        self.show_data_button = QPushButton("Show Data")
         self.show_data_button.clicked.connect(self.load_data_from_db)
         layout.addWidget(self.show_data_button)
         
-        self.delete_button = QPushButton("Удалить")
+        self.update_button = QPushButton("Update")
+        self.update_button.clicked.connect(self.open_update_dialog)
+        layout.addWidget(self.update_button)
+        
+        self.delete_button = QPushButton("Delete")
         self.delete_button.clicked.connect(self.delete_selected_row)
         layout.addWidget(self.delete_button)
         
@@ -46,8 +51,6 @@ class Employees(QWidget):
                 cur.execute(query)
                 rows = cur.fetchall()
 
-                
-
         self.table_widget.setRowCount(len(rows))
         self.table_widget.setColumnCount(len(rows[0]))
 
@@ -61,19 +64,42 @@ class Employees(QWidget):
         if dialog.exec_():
             self.load_data_from_db()
             
+    
     def delete_selected_row(self):
         with self.conn as conn:
             with conn.cursor() as cursor:
-                selected_rows = self.table_widget.selectionModel().selectedRows()
-                if not selected_rows:
-                    QMessageBox.information(self, "Уведомление", "Выберите строку для удаления.")
+                selected_indexes = self.table_widget.selectionModel().selectedRows()
+                if not selected_indexes:
+                    QMessageBox.information(self, "Notification", "Select a row to delete.")
                     return
-                employee_id = self.table_widget.item(selected_rows[0].row(), 0).text()  # Предполагается, что ID сотрудника находится в первом столбце
+
+                index = selected_indexes[0]
+                surname = self.table_widget.item(index.row(), 0).text()
+                name = self.table_widget.item(index.row(), 1).text()
                 try:
-                    cursor.execute("DELETE FROM employees WHERE id_employee = %s", (employee_id,))
+                    cursor.execute("DELETE FROM employees WHERE surname = %s AND name = %s", (surname, name))
                     conn.commit()
-                    QMessageBox.information(self, "Успех", "Строка успешно удалена.")
+                    QMessageBox.information(self, "Success", "Row successfully deleted.")
                     self.load_data_from_db()
                 except Exception as e:
-                    QMessageBox.critical(self, "Ошибка", f"Не удалось удалить строку: {str(e)}")
+                    QMessageBox.critical(self, "Error", f"Failed to delete row: {str(e)}")
 
+                    
+    def open_update_dialog(self):
+        selected_indexes = self.table_widget.selectionModel().selectedRows()
+        if not selected_indexes:
+            QMessageBox.information(self, "Reminder", "Select a row to update.")
+            return
+
+        selected_row_index = selected_indexes[0].row()
+        surname = self.table_widget.item(selected_row_index, 0).text()
+        name = self.table_widget.item(selected_row_index, 1).text()
+        
+        with self.conn as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT id_employee FROM employees WHERE surname = %s AND name = %s", (surname, name))
+                id_employee = cur.fetchone()[0]
+
+        dialog = UpdateEmployee(self.conn, id_employee, surname, name)
+        if dialog.exec_():
+            self.load_data_from_db()
