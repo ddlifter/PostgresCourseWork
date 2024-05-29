@@ -5,7 +5,8 @@ from add_rank import AddRank
 from update_rank import UpdateRank  # Подключаем класс для окна обновления разряда
 
 class Ranks(QWidget):
-    def __init__(self, conn: ConnectionManager, IsAdmin):
+    def __init__(self, main_form, conn: ConnectionManager, IsAdmin):
+        self.main_form = main_form
         super().__init__()
         self.conn : ConnectionManager = conn
         self.showMaximized()
@@ -35,14 +36,23 @@ class Ranks(QWidget):
         self.delete_button.clicked.connect(self.delete_selected_row)
         layout.addWidget(self.delete_button)
         
+        self.back_button = QPushButton("Вернуться на главное окно")  # Создаем кнопку
+        self.back_button.clicked.connect(self.go_to_main_window)  # Подключаем метод
+        layout.addWidget(self.back_button)
+        
         layout.addWidget(self.table_widget)
         
         if IsAdmin != True:
             self.add_button.setEnabled(False)
             self.delete_button.setEnabled(False)
+            self.update_button.setEnabled(False)
 
         # Load data from database and configure table
         self.load_data_from_db()
+        
+    def go_to_main_window(self):
+        self.main_form.show()
+        self.close()
 
     def load_data_from_db(self):
         with self.conn as conn:

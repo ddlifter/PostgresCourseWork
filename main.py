@@ -57,27 +57,27 @@ class MainForm(QMainWindow):
         self.setCentralWidget(central_widget)
 
     def open_training_form(self):
-        self.training_form = Training(self.conn, IsAdmin)
+        self.training_form = Training(self, self.conn, IsAdmin)
         self.training_form.show()
         self.close()
 
     def open_form1(self):
-        self.form1 = Employees(self.conn, IsAdmin)
+        self.form1 = Employees(self, self.conn, IsAdmin)
         self.form1.show()
         self.close()
 
     def open_form2(self):
-        self.form2 = Specialties(self.conn, IsAdmin)
+        self.form2 = Specialties(self, self.conn, IsAdmin)
         self.form2.show()
         self.close()
 
     def open_form3(self):
-        self.form3 = Norms(self.conn, IsAdmin)
+        self.form3 = Norms(self, self.conn, IsAdmin)
         self.form3.show()
         self.close()
 
     def open_form4(self):
-        self.form4 = Ranks(self.conn, IsAdmin)
+        self.form4 = Ranks(self, self.conn, IsAdmin)
         self.form4.show()
         self.close()
 
@@ -116,6 +116,7 @@ class AuthorizationWindow(QWidget):
         self.setLayout(layout)
 
     def handleLogin(self):
+        global IsAdmin
         username = self.usernameInput.text()
         password = self.passwordInput.text()
         

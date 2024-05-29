@@ -6,7 +6,8 @@ from add_training import AddTraining
 from update_training import UpdateTraining
 
 class Training(QWidget):
-    def __init__(self, conn: ConnectionManager, IsAdmin):
+    def __init__(self, main_form, conn: ConnectionManager, IsAdmin):
+        self.main_form = main_form
         super().__init__()
         self.conn: ConnectionManager = conn
         self.showMaximized()
@@ -33,14 +34,23 @@ class Training(QWidget):
         self.delete_button.clicked.connect(self.delete_selected_row)
         layout.addWidget(self.delete_button)
         
+        self.back_button = QPushButton("Вернуться на главное окно")  # Создаем кнопку
+        self.back_button.clicked.connect(self.go_to_main_window)  # Подключаем метод
+        layout.addWidget(self.back_button)
+        
         layout.addWidget(self.table_widget)
         
         if IsAdmin != True:
             self.add_button.setEnabled(False)
             self.delete_button.setEnabled(False)
+            self.update_data_button.setEnabled(False)
             
         self.table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.table_widget.itemSelectionChanged.connect(self.open_update_dialog)
+        
+    def go_to_main_window(self):
+        self.main_form.show()
+        self.close()
 
     def load_data_from_db(self):
         with self.conn as conn:
