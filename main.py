@@ -124,7 +124,7 @@ class AuthorizationWindow(QWidget):
             role = "admin_role"
             IsAdmin = True
         elif username == "employee" and password == "12345":
-            role = "employee_role"
+            role = "employee_user"
             IsAdmin = False
         else:
             QMessageBox.warning(self, "Ошибка", "Неверный логин или пароль.")
