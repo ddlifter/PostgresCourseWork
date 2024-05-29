@@ -77,6 +77,8 @@ class Norms(QWidget):
         self.table_widget.show()
         self.table_widget.setRowCount(len(rows))
         self.table_widget.setColumnCount(len(rows[0]))
+        column_names = ["Норма", "Описание нормы", "Разряд", "Описание разряда"]
+        self.table_widget.setHorizontalHeaderLabels(column_names)
 
         for i, row in enumerate(rows):
             for j, value in enumerate(row):
