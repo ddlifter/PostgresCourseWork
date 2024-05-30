@@ -10,24 +10,24 @@ class AddEmployee(QDialog):
         super().__init__()
         self.conn : ConnectionManager = conn
 
-        self.setWindowTitle("Add Data")
+        self.setWindowTitle("Добавить данные")
         layout = QVBoxLayout()
 
-        self.surname_label = QLabel("SurName:")
+        self.surname_label = QLabel("Фамилия:")
         self.surname_input = QLineEdit()
         self.surname_input.setReadOnly(False)
         self.surname_input.textChanged.connect(self.check_inputs)  # Проверка фамилии при изменении текста
         layout.addWidget(self.surname_label)
         layout.addWidget(self.surname_input)
 
-        self.name_label = QLabel("Name:")
+        self.name_label = QLabel("Имя:")
         self.name_input = QLineEdit()
         self.name_input.setReadOnly(False)
         self.name_input.textChanged.connect(self.check_inputs)  # Проверка имени при изменении текста
         layout.addWidget(self.name_label)
         layout.addWidget(self.name_input)
 
-        self.submit_button = QPushButton("Submit")
+        self.submit_button = QPushButton("Подтвердить")
         self.submit_button.clicked.connect(self.submit_data)
         layout.addWidget(self.submit_button)
 
@@ -63,9 +63,8 @@ class AddEmployee(QDialog):
                     cur.execute("INSERT INTO employees (id_specialty, surname, name) VALUES (%s, %s, %s)",
                                 (specialty_id, surname, name))
                     conn.commit()
-                    cur.close()
-                    print("Сотрудник добавлен успешно.")
-                    self.close()
+                    QMessageBox.information(self, "Успех", "Информация о сотруднике успешно добавлена.")
+                    self.accept()
                 except Exception as e:
                     print(f"Ошибка при добавлении сотрудника: {e}")
             

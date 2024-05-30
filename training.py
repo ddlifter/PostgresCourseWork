@@ -65,8 +65,10 @@ class Training(QWidget):
         self.table_widget.clear()  # Очищаем таблицу перед загрузкой новых данных
 
         if not rows:
+            self.table_widget.hide()
             return
 
+        self.table_widget.show()
         self.table_widget.setRowCount(len(rows))
         self.table_widget.setColumnCount(len(rows[0]))
         column_names = ["Сотрудник", "Норма", "Дата"]

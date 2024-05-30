@@ -8,24 +8,24 @@ class AddNorm(QDialog):
         super().__init__()
         self.conn : ConnectionManager = conn
 
-        self.setWindowTitle("Add Data")
+        self.setWindowTitle("Добавить данные")
         layout = QVBoxLayout()
         
-        self.name_label = QLabel("Name:")
+        self.name_label = QLabel("Название:")
         self.name_input = QLineEdit()
         self.name_input.setReadOnly(False)
         self.name_input.textChanged.connect(self.check_inputs)
         layout.addWidget(self.name_label)
         layout.addWidget(self.name_input)
 
-        self.surname_label = QLabel("Description:")
+        self.surname_label = QLabel("Описание:")
         self.surname_input = QLineEdit()
         self.surname_input.setReadOnly(False)
         self.surname_input.textChanged.connect(self.check_inputs)
         layout.addWidget(self.surname_label)
         layout.addWidget(self.surname_input)
 
-        self.submit_button = QPushButton("Submit")
+        self.submit_button = QPushButton("Подтвердить")
         self.submit_button.clicked.connect(self.submit_data)
         layout.addWidget(self.submit_button)
         
@@ -58,9 +58,8 @@ class AddNorm(QDialog):
                     cur.execute("INSERT INTO norms (id_rank, name, description) VALUES (%s, %s, %s)",
                                 (rank_id, name, surname))
                     conn.commit()
-                    cur.close()
-                    print("Сотрудник добавлен успешно.")
-                    self.close()
+                    QMessageBox.information(self, "Успех", "Информация о норме успешно добавлена.")
+                    self.accept()
                 except Exception as e:
                     print(f"Ошибка при добавлении нормы: {e}")
             

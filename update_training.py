@@ -8,7 +8,7 @@ class UpdateTraining(QDialog):
         self.conn: ConnectionManager = conn
         self.training_id = training_id
 
-        self.setWindowTitle("Update Data")
+        self.setWindowTitle("Обновить данные")
         layout = QVBoxLayout()
 
         self.date_label = QLabel("Дата:")
@@ -23,7 +23,7 @@ class UpdateTraining(QDialog):
         self.setLayout(layout)
         self.setWindowTitle("Выбор даты")
 
-        self.submit_button = QPushButton("Submit")
+        self.submit_button = QPushButton("Подтвердить")
         self.submit_button.clicked.connect(self.submit_data)
         layout.addWidget(self.submit_button)
 
@@ -41,36 +41,19 @@ class UpdateTraining(QDialog):
         layout.addWidget(self.specialtyLabel2)
         layout.addWidget(self.specialtyCombo2)
 
-        self.load_training_data()
-
-    def load_training_data(self):
-        with self.conn as conn:
-            with conn.cursor() as cur:
-                try:
-                    cur.execute("SELECT id_employee, id_norm, data FROM training WHERE id_training = %s", (self.training_id,))
-                    training_data = cur.fetchone()
-                    if training_data:
-                        employee_id, norm_id, date = training_data
-                        self.specialtyCombo.setCurrentIndex(self.specialtyCombo.findData(employee_id))
-                        self.specialtyCombo2.setCurrentIndex(self.specialtyCombo2.findData(norm_id))
-                        self.date_input.setDate(QDate.fromString(date.strftime("%Y-%m-%d"), "yyyy-MM-dd"))
-                    cur.close()
-                except Exception as e:
-                    print(f"Ошибка при загрузке данных тренировки: {e}")
-
     def submit_data(self):
+        name = self.date_input.date().toString("yyyy-MM-dd")
+        empl_id = self.specialtyCombo.currentData()
+        norm_id = self.specialtyCombo2.currentData()
+        
         with self.conn as conn:
             with conn.cursor() as cur:
-                name = self.date_input.date().toString("yyyy-MM-dd")
-                empl_id = self.specialtyCombo.currentData()
-                norm_id = self.specialtyCombo2.currentData()
                 try:
                     cur.execute("UPDATE training SET id_employee = %s, id_norm = %s, data = %s WHERE id_training = %s",
                                 (empl_id, norm_id, name, self.training_id))
                     conn.commit()
-                    cur.close()
                     QMessageBox.information(self, "Успех", "Данные обновлены успешно.")
-                    self.close()
+                    self.accept()
                     
                 except Exception as e:
                     QMessageBox.critical(self, "Ошибка", f"Ошибка при обновлении данных тренировки: {e}")

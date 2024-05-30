@@ -9,7 +9,7 @@ class AddTraining(QDialog):
         super().__init__()
         self.conn : ConnectionManager = conn
 
-        self.setWindowTitle("Add Data")
+        self.setWindowTitle("Добавить данные")
         layout = QVBoxLayout()
 
         self.date_label = QLabel("Дата:")
@@ -25,7 +25,7 @@ class AddTraining(QDialog):
         self.setLayout(layout)
         self.setWindowTitle("Выбор даты")
 
-        self.submit_button = QPushButton("Submit")
+        self.submit_button = QPushButton("Подтвердить")
         self.submit_button.clicked.connect(self.submit_data)
         layout.addWidget(self.submit_button)
 
@@ -55,9 +55,8 @@ class AddTraining(QDialog):
                     cur.execute("INSERT INTO training(id_employee, id_norm, data) VALUES (%s, %s, %s)",
                                 (empl_id, norm_id, name))
                     conn.commit()
-                    cur.close()
-                    print("Сотрудник добавлен успешно.")
-                    self.close()
+                    QMessageBox.information(self, "Успех", "Информация об обучении успешно добавлена.")
+                    self.accept()
                 except Exception as e:
                     print(f"Ошибка при добавлении сотрудника: {e}")
             
