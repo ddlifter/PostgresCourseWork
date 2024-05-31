@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QLineEdit, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QLineEdit, QMessageBox, QHBoxLayout
 from employees import Employees
 from specialties import Specialties
 from norms import Norms
@@ -6,7 +6,8 @@ from ranks import Ranks
 from training import Training
 import sys
 from connection import ConnectionManager
-from PyQt5.QtCore import Qt  
+from PyQt5.QtCore import Qt 
+from PyQt5.QtGui import QFont
 
 IsAdmin = True
 
@@ -81,7 +82,6 @@ class MainForm(QMainWindow):
         self.login_form = AuthorizationWindow()
         self.login_form.show()
         self.close()
-
 class AuthorizationWindow(QWidget):
     def __init__(self):
         super().__init__()
@@ -89,26 +89,45 @@ class AuthorizationWindow(QWidget):
 
     def initUI(self):
         self.setWindowTitle("Авторизация")
-        self.setGeometry(300, 300, 400, 200)
+        self.setFixedSize(400, 200)
+
+        screen_geometry = QApplication.desktop().availableGeometry()
+        x = (screen_geometry.width() - self.width()) // 2
+        y = (screen_geometry.height() - self.height()) // 2
+        self.move(x, y)
+
 
         layout = QVBoxLayout()
 
-        self.usernameLabel = QLabel("Логин:")
-        layout.addWidget(self.usernameLabel)
-        self.usernameInput = QLineEdit()
-        layout.addWidget(self.usernameInput)
+        # Макет для поля ввода логина
+        username_layout = QHBoxLayout()
+        username_layout.setAlignment(Qt.AlignCenter)
+        self.usernameLabel = QLabel("Логин:", self)
+        self.usernameInput = QLineEdit(self)
+        username_layout.addWidget(self.usernameLabel)
+        username_layout.addWidget(self.usernameInput)
+        layout.addLayout(username_layout)
 
-        self.passwordLabel = QLabel("Пароль:")
-        layout.addWidget(self.passwordLabel)
-        self.passwordInput = QLineEdit()
+        # Макет для поля ввода пароля
+        password_layout = QHBoxLayout()
+        password_layout.setAlignment(Qt.AlignCenter)
+        self.passwordLabel = QLabel("Пароль:", self)
+        self.passwordInput = QLineEdit(self)
         self.passwordInput.setEchoMode(QLineEdit.Password)
-        layout.addWidget(self.passwordInput)
+        password_layout.addWidget(self.passwordLabel)
+        password_layout.addWidget(self.passwordInput)
+        layout.addLayout(password_layout)
 
-        self.loginButton = QPushButton("Войти")
+        # Макет для кнопки
+        button_layout = QHBoxLayout()
+        button_layout.setAlignment(Qt.AlignCenter)
+        self.loginButton = QPushButton("Войти", self)
         self.loginButton.clicked.connect(self.handleLogin)
-        layout.addWidget(self.loginButton)
+        button_layout.addWidget(self.loginButton)
+        layout.addLayout(button_layout)
 
         self.setLayout(layout)
+
 
     def handleLogin(self):
         global IsAdmin
