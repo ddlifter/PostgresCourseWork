@@ -12,7 +12,13 @@ class Specialties(QWidget):
         self.showMaximized()
         layout = QVBoxLayout()
         self.setWindowTitle("Специальности")
-        self.setGeometry(100, 100, 600, 400)
+        self.setFixedSize(600, 400)
+        
+        screen_geometry = QApplication.desktop().availableGeometry()
+        x = (screen_geometry.width() - self.width()) // 2
+        y = (screen_geometry.height() - self.height()) // 2
+        self.move(x, y)
+        
         self.setLayout(layout)
         self.table_widget = QTableWidget()
         self.table_widget.setGeometry(50, 50, 500, 300)  # Установите размеры и позицию

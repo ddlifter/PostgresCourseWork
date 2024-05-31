@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QWidget, QLabel, QLineEdit, QDialog, QMessageBox, QTableWidget, QTableWidgetItem, QAbstractItemView
+from PyQt5.QtWidgets import QApplication, QVBoxLayout, QPushButton, QWidget, QLabel, QLineEdit, QDialog, QMessageBox, QTableWidget, QTableWidgetItem, QAbstractItemView
 import psycopg2
 from PyQt5.QtCore import Qt
 from connection import ConnectionManager
@@ -12,7 +12,12 @@ class Norms(QWidget):
         self.conn: ConnectionManager = conn
         layout = QVBoxLayout(self)
         self.setWindowTitle("Нормы")
-        self.setGeometry(100, 100, 600, 400)
+        self.setFixedSize(600, 400)
+        
+        screen_geometry = QApplication.desktop().availableGeometry()
+        x = (screen_geometry.width() - self.width()) // 2
+        y = (screen_geometry.height() - self.height()) // 2
+        self.move(x, y)
         
 
         # Создаем вертикальный layout для кнопок
