@@ -6,6 +6,7 @@ class UpdateTraining(QDialog):
     def __init__(self, conn: ConnectionManager, training_id: int):
         super().__init__()
         self.conn: ConnectionManager = conn
+        self.setFixedSize(250, 230)
         self.training_id = training_id
 
         self.setWindowTitle("Обновить данные")
@@ -23,10 +24,6 @@ class UpdateTraining(QDialog):
         self.setLayout(layout)
         self.setWindowTitle("Выбор даты")
 
-        self.submit_button = QPushButton("Подтвердить")
-        self.submit_button.clicked.connect(self.submit_data)
-        layout.addWidget(self.submit_button)
-
         self.setLayout(layout)
 
         self.specialtyLabel = QLabel('Сотрудник:')
@@ -40,6 +37,10 @@ class UpdateTraining(QDialog):
         self.loadNorms()
         layout.addWidget(self.specialtyLabel2)
         layout.addWidget(self.specialtyCombo2)
+        
+        self.submit_button = QPushButton("Подтвердить")
+        self.submit_button.clicked.connect(self.submit_data)
+        layout.addWidget(self.submit_button)
 
     def submit_data(self):
         name = self.date_input.date().toString("yyyy-MM-dd")

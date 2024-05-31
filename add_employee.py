@@ -9,6 +9,7 @@ class AddEmployee(QDialog):
     def __init__(self, conn: ConnectionManager):
         super().__init__()
         self.conn : ConnectionManager = conn
+        self.setFixedSize(250, 230)
 
         self.setWindowTitle("Добавить данные")
         layout = QVBoxLayout()
@@ -27,10 +28,6 @@ class AddEmployee(QDialog):
         layout.addWidget(self.name_label)
         layout.addWidget(self.name_input)
 
-        self.submit_button = QPushButton("Подтвердить")
-        self.submit_button.clicked.connect(self.submit_data)
-        layout.addWidget(self.submit_button)
-
         self.setLayout(layout)
         
         self.specialtyLabel = QLabel('Специальность:')
@@ -38,6 +35,10 @@ class AddEmployee(QDialog):
         self.loadSpecialties()
         layout.addWidget(self.specialtyLabel)
         layout.addWidget(self.specialtyCombo)
+        
+        self.submit_button = QPushButton("Подтвердить")
+        self.submit_button.clicked.connect(self.submit_data)
+        layout.addWidget(self.submit_button)
 
         # Добавим кнопку "Submit" и сделаем ее неактивной изначально
         self.submit_button.setEnabled(False)

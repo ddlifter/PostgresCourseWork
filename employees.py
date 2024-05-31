@@ -45,6 +45,7 @@ class Employees(QWidget):
         # Создаем виджет таблицы и настраиваем его
         self.table_widget = QTableWidget()
         self.table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.table_widget.setSelectionMode(QAbstractItemView.SingleSelection)
         layout.addWidget(self.table_widget)
 
         self.setLayout(layout)

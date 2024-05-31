@@ -7,6 +7,7 @@ class AddSpecialty(QDialog):
     def __init__(self, conn: ConnectionManager):
         super().__init__()
         self.conn : ConnectionManager = conn
+        self.setFixedSize(250, 230)
 
         self.setWindowTitle("Добавить данные")
         layout = QVBoxLayout()

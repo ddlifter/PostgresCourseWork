@@ -7,6 +7,7 @@ class AddNorm(QDialog):
     def __init__(self, conn: ConnectionManager):
         super().__init__()
         self.conn : ConnectionManager = conn
+        self.setFixedSize(250, 230)
 
         self.setWindowTitle("Добавить данные")
         layout = QVBoxLayout()
@@ -24,10 +25,6 @@ class AddNorm(QDialog):
         self.surname_input.textChanged.connect(self.check_inputs)
         layout.addWidget(self.surname_label)
         layout.addWidget(self.surname_input)
-
-        self.submit_button = QPushButton("Подтвердить")
-        self.submit_button.clicked.connect(self.submit_data)
-        layout.addWidget(self.submit_button)
         
         self.specialtyLabel = QLabel('Разряд:')
         self.specialtyCombo = QComboBox()
@@ -36,6 +33,10 @@ class AddNorm(QDialog):
         layout.addWidget(self.specialtyCombo)
 
         self.setLayout(layout)
+        
+        self.submit_button = QPushButton("Подтвердить")
+        self.submit_button.clicked.connect(self.submit_data)
+        layout.addWidget(self.submit_button)
         
         self.submit_button.setEnabled(False)
         

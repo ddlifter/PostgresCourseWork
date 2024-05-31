@@ -8,6 +8,7 @@ class UpdateEmployee(QDialog):
         super().__init__()
         self.conn: ConnectionManager = conn
         self.id_employee = id_employee
+        self.setFixedSize(250, 230)
 
         self.setWindowTitle("Обновление информации о сотруднике")
         layout = QVBoxLayout()

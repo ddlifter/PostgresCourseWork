@@ -5,6 +5,7 @@ class UpdateSpecialty(QDialog):
     def __init__(self, conn: ConnectionManager, spec_id, spec_name, description):
         super().__init__()
         self.conn = conn
+        self.setFixedSize(250, 230)
         self.spec_id = spec_id
         self.spec_name = spec_name
         self.description = description

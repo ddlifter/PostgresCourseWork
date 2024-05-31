@@ -8,6 +8,7 @@ class AddTraining(QDialog):
     def __init__(self, conn: ConnectionManager):
         super().__init__()
         self.conn : ConnectionManager = conn
+        self.setFixedSize(250, 230)
 
         self.setWindowTitle("Добавить данные")
         layout = QVBoxLayout()
@@ -23,11 +24,7 @@ class AddTraining(QDialog):
 
         # Устанавливаем макет в виджет
         self.setLayout(layout)
-        self.setWindowTitle("Выбор даты")
-
-        self.submit_button = QPushButton("Подтвердить")
-        self.submit_button.clicked.connect(self.submit_data)
-        layout.addWidget(self.submit_button)
+        self.setWindowTitle("Добавить данные")
 
         self.setLayout(layout)
         
@@ -42,6 +39,10 @@ class AddTraining(QDialog):
         self.loadNorms()
         layout.addWidget(self.specialtyLabel2)
         layout.addWidget(self.specialtyCombo2)
+        
+        self.submit_button = QPushButton("Подтвердить")
+        self.submit_button.clicked.connect(self.submit_data)
+        layout.addWidget(self.submit_button)
         
 
 
