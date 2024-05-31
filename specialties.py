@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QTableWidget, QTableWidgetItem, QMessageBox, QAbstractItemView
+from PyQt5.QtWidgets import QApplication, QHeaderView, QPushButton, QVBoxLayout, QWidget, QLabel, QTableWidget, QTableWidgetItem, QMessageBox, QAbstractItemView
 from connection import ConnectionManager
 from add_specialty import AddSpecialty
 from update_specialty import UpdateSpecialty
@@ -29,10 +29,6 @@ class Specialties(QWidget):
         self.add_button = QPushButton("Добавить")
         self.add_button.clicked.connect(self.open_add_dialog)
         layout.addWidget(self.add_button)
-
-        self.show_data_button = QPushButton("Показать данные")
-        self.show_data_button.clicked.connect(self.load_data_from_db)
-        layout.addWidget(self.show_data_button)
         
         self.update_data_button = QPushButton("Обновить данные")
         self.update_data_button.clicked.connect(self.open_update_dialog)
@@ -47,6 +43,8 @@ class Specialties(QWidget):
         layout.addWidget(self.back_button)
         
         layout.addWidget(self.table_widget)
+        
+        self.table_widget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         
         if not IsAdmin:
             self.add_button.setEnabled(False)

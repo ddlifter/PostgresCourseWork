@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QApplication, QVBoxLayout, QPushButton, QWidget, QLabel, QLineEdit, QDialog, QMessageBox, QTableWidget, QTableWidgetItem, QAbstractItemView
+from PyQt5.QtWidgets import QHeaderView, QHBoxLayout, QApplication, QVBoxLayout, QPushButton, QWidget, QLabel, QLineEdit, QDialog, QMessageBox, QTableWidget, QTableWidgetItem, QAbstractItemView
 import psycopg2
 from PyQt5.QtCore import Qt
 from connection import ConnectionManager
@@ -19,19 +19,14 @@ class Norms(QWidget):
         y = (screen_geometry.height() - self.height()) // 2
         self.move(x, y)
         
-
-        # Создаем вертикальный layout для кнопок
-        button_layout = QVBoxLayout()
+        # Создаем горизонтальный layout для кнопок
+        button_layout = QHBoxLayout()
 
         self.add_button = QPushButton("Добавить")
         self.add_button.clicked.connect(self.open_add_dialog)
         button_layout.addWidget(self.add_button)
 
-        self.show_data_button = QPushButton("Показать данные")
-        self.show_data_button.clicked.connect(self.load_data_from_db)
-        button_layout.addWidget(self.show_data_button)
-
-        self.update_button = QPushButton("Обновить")
+        self.update_button = QPushButton("Изменить")
         self.update_button.clicked.connect(self.open_update_dialog)
         button_layout.addWidget(self.update_button)
 
@@ -39,17 +34,21 @@ class Norms(QWidget):
         self.delete_button.clicked.connect(self.delete_selected_row)
         button_layout.addWidget(self.delete_button)
         
-        self.back_button = QPushButton("Вернуться на главное окно")  # Создаем кнопку
-        self.back_button.clicked.connect(self.go_to_main_window)  # Подключаем метод
-        button_layout.addWidget(self.back_button)
-
         layout.addLayout(button_layout)
+        
+        # Создаем кнопку для возврата на главное окно
+        self.back_button = QPushButton("Вернуться на главное окно")
+        self.back_button.clicked.connect(self.go_to_main_window)
+        layout.addWidget(self.back_button)
 
         # Создаем виджет таблицы и настраиваем его
         self.table_widget = QTableWidget()
-        self.table_widget.setGeometry(50, 50, 500, 300)
         self.table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
         layout.addWidget(self.table_widget)
+
+        # Растягиваем таблицу на всю ширину формы
+        self.table_widget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+
 
         if not IsAdmin:
             self.add_button.setEnabled(False)

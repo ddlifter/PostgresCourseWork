@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QTableWidget, QTableWidgetItem, QMessageBox, QAbstractItemView
+from PyQt5.QtWidgets import QApplication, QHeaderView, QPushButton, QVBoxLayout, QWidget, QTableWidget, QTableWidgetItem, QMessageBox, QAbstractItemView
 from connection import ConnectionManager
 from PyQt5.QtCore import Qt
 from add_rank import AddRank
@@ -30,10 +30,6 @@ class Ranks(QWidget):
         self.add_button = QPushButton("Добавить")
         self.add_button.clicked.connect(self.open_add_dialog)
         layout.addWidget(self.add_button)
-
-        self.show_data_button = QPushButton("Показать данные")
-        self.show_data_button.clicked.connect(self.load_data_from_db)
-        layout.addWidget(self.show_data_button)
         
         self.update_button = QPushButton("Обновить")
         self.update_button.clicked.connect(self.open_update_dialog)
@@ -48,6 +44,8 @@ class Ranks(QWidget):
         layout.addWidget(self.back_button)
         
         layout.addWidget(self.table_widget)
+        
+        self.table_widget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         
         if IsAdmin != True:
             self.add_button.setEnabled(False)

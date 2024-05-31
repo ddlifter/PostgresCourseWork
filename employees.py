@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QWidget, QLabel, QLineEdit, QDialog, QMessageBox, QTableWidget, QTableWidgetItem, QAbstractItemView, QApplication
+from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QWidget, QHeaderView, QLineEdit, QDialog, QMessageBox, QTableWidget, QTableWidgetItem, QAbstractItemView, QApplication
 import psycopg2
 from PyQt5.QtCore import Qt
 from connection import ConnectionManager
@@ -30,10 +30,6 @@ class Employees(QWidget):
         self.add_button.clicked.connect(self.open_add_dialog)
         layout.addWidget(self.add_button)
 
-        self.show_data_button = QPushButton("Показать данные")
-        self.show_data_button.clicked.connect(self.load_data_from_db)
-        layout.addWidget(self.show_data_button)
-
         self.update_button = QPushButton("Обновить")
         self.update_button.clicked.connect(self.open_update_dialog)
         layout.addWidget(self.update_button)
@@ -47,6 +43,8 @@ class Employees(QWidget):
         layout.addWidget(self.back_button)  # Добавляем кнопку в макет
 
         layout.addWidget(self.table_widget)
+        
+        self.table_widget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
         if not IsAdmin:
             self.add_button.setEnabled(False)
@@ -81,7 +79,7 @@ class Employees(QWidget):
         self.table_widget.show()
         self.table_widget.setRowCount(len(rows))
         self.table_widget.setColumnCount(len(rows[0]))
-        column_names = ["Фамилия", "Имя", "Специальность", "Описание специальности"]
+        column_names = ["Фамилия", "Имя", "Специальность", "Описание"]
         self.table_widget.setHorizontalHeaderLabels(column_names)
 
         for i, row in enumerate(rows):
