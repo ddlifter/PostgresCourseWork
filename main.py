@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QLineEdit, QMessageBox, QHBoxLayout
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QLineEdit, QMessageBox, QHBoxLayout, QSizePolicy
 from employees import Employees
 from specialties import Specialties
 from norms import Norms
@@ -16,42 +16,60 @@ class MainForm(QMainWindow):
         self.conn : ConnectionManager = conn
         super().__init__()
         self.setWindowTitle("Главное меню")
-        self.setGeometry(100, 100, 600, 400)
+        self.setFixedSize(480, 280)
+        
+        screen_geometry = QApplication.desktop().availableGeometry()
+        x = (screen_geometry.width() - self.width()) // 2
+        y = (screen_geometry.height() - self.height()) // 2
+        self.move(x, y)
 
-        # Создаем вертикальный layout для размещения кнопок
-        layout = QVBoxLayout()
+        # Создаем основной layout
+        main_layout = QVBoxLayout()
 
-        # Кнопка "Обучение" - акцентированная
-        self.training_button = QPushButton("Обучение (основная)")
+        # Создаем layout для кнопки "Обучение"
+        training_layout = QHBoxLayout()
+        self.training_button = QPushButton("Процесс обучения")
         self.training_button.clicked.connect(self.open_training_form)
         self.training_button.setStyleSheet("background-color: #4CAF50; color: white; border: none; padding: 10px 24px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer;")
-        layout.addWidget(self.training_button)
+        training_layout.addWidget(self.training_button)
+        main_layout.addLayout(training_layout)
 
-        # Кнопка "Выйти" рядом с кнопкой "Обучение"
-        self.logout_button = QPushButton("Выйти")
-        self.logout_button.clicked.connect(self.open_login_form)
-        layout.addWidget(self.logout_button)
+        # Подпись "Справочники"
+        main_layout.addWidget(QWidget())  # Добавляем пустой виджет для создания пробела
+        label = QLabel("Справочники")
+        label.setAlignment(Qt.AlignCenter)
+        main_layout.addWidget(label)
 
-        # Отдельный блок для остальных кнопок
-        other_buttons_layout = QVBoxLayout()
-
-        # Кнопки для различных форм
+        # Создаем layout для кнопок "Сотрудники" и "Специальности"
+        references_layout = QHBoxLayout()
         buttons_info = [("Сотрудники", self.open_form1),
-                        ("Специальности", self.open_form2),
-                        ("Нормы", self.open_form3),
+                        ("Специальности", self.open_form2)]
+        for text, function in buttons_info:
+            button = QPushButton(text)
+            button.clicked.connect(function)
+            references_layout.addWidget(button)
+        main_layout.addLayout(references_layout)
+
+        # Создаем layout для кнопок "Нормы" и "Разряды"
+        norms_layout = QHBoxLayout()
+        buttons_info = [("Нормы", self.open_form3),
                         ("Разряды", self.open_form4)]
         for text, function in buttons_info:
             button = QPushButton(text)
             button.clicked.connect(function)
-            other_buttons_layout.addWidget(button)
+            norms_layout.addWidget(button)
+        main_layout.addLayout(norms_layout)
 
-        # Добавляем блок с остальными кнопками в основной layout
-        layout.addLayout(other_buttons_layout)
+        # Кнопка "Выйти"
+        self.logout_button = QPushButton("Выйти")
+        self.logout_button.clicked.connect(self.open_login_form)
+        main_layout.addWidget(self.logout_button, alignment=Qt.AlignCenter)
 
-        # Устанавливаем layout в качестве центрального виджета
+        # Создаем виджет, на котором будет размещен основной layout
         central_widget = QWidget()
-        central_widget.setLayout(layout)
+        central_widget.setLayout(main_layout)
         self.setCentralWidget(central_widget)
+
 
     def open_training_form(self):
         self.training_form = Training(self, self.conn, IsAdmin)
