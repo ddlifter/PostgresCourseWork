@@ -55,7 +55,7 @@ class UpdateNorm(QDialog):
         new_specialty_id = self.specialty_combo.currentData()
 
         if not new_surname or not new_name:
-            QMessageBox.critical(self, "Ошибка", "Фамилия и имя не могут быть пустыми.")
+            QMessageBox.critical(self, "Ошибка", "Поля не могут быть пустыми.")
             return
 
         with self.conn as conn:

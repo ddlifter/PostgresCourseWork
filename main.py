@@ -8,6 +8,7 @@ import sys
 from connection import ConnectionManager
 from PyQt5.QtCore import Qt 
 from PyQt5.QtGui import QFont
+import psycopg2
 
 IsAdmin = True
 
@@ -155,17 +156,32 @@ class AuthorizationWindow(QWidget):
         if username == "admin" and password == "12345":
             role = "admin_role"
             IsAdmin = True
-        elif username == "employee" and password == "12345":
-            role = "employee_user"
-            IsAdmin = False
         else:
-            QMessageBox.warning(self, "Ошибка", "Неверный логин или пароль.")
-            return
+            # Подключаемся к базе данных
+            conn = psycopg2.connect(host='localhost', user='postgres', password='12345', database='postgres')
+            cursor = conn.cursor()
+            
+            # Выполняем запрос к базе данных для загрузки фамилий сотрудников
+            cursor.execute("SELECT surname FROM employees")
+            employee_surnames = [row[0] for row in cursor.fetchall()]  # Получаем все фамилии сотрудников в массив
+
+            # Проверяем, есть ли введенный логин в фамилиях сотрудников
+            if username in employee_surnames and password == "12345":
+                role = "employee_user"
+                IsAdmin = False
+            else:
+                QMessageBox.warning(self, "Ошибка", "Неверный логин или пароль.")
+                return
+            
+            # Закрываем соединение с базой данных
+            cursor.close()
+            conn.close()
 
         conn = ConnectionManager(role)
         self.form1 = MainForm(conn, IsAdmin)
         self.form1.show()
         self.close()
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

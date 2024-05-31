@@ -44,8 +44,8 @@ class AddEmployee(QDialog):
         self.submit_button.setEnabled(False)
 
     def check_inputs(self):
-        surname = self.surname_input.text().strip()
-        name = self.name_input.text().strip()
+        surname = self.surname_input.text()
+        name = self.name_input.text()
 
         # Проверяем, что оба поля не пустые и не содержат цифры
         if surname and name and surname.isalpha() and name.isalpha():

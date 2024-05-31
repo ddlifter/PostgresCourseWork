@@ -35,6 +35,14 @@ class UpdateRank(QDialog):
         new_spec_name = self.spec_name_edit.text()
         new_description = self.description_edit.text()
         
+        if not new_description or not new_spec_name:
+            QMessageBox.critical(self, "Ошибка", "Поля не могут быть пустыми.")
+            return
+        
+        if any(char.isdigit() for char in new_spec_name) or any(char.isdigit() for char in new_description):
+            QMessageBox.critical(self, "Ошибка", "Поля не могут содержать цифры.")
+            return
+        
         with self.conn as conn:
             with conn.cursor() as cursor:
                 try:

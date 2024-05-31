@@ -33,11 +33,12 @@ class UpdateEmployee(QDialog):
         self.submit_button = QPushButton("Подтвердить")
         self.submit_button.clicked.connect(self.submit_data)
         layout.addWidget(self.submit_button)
-
+        
         self.setLayout(layout)
-
+        
         self.load_specialties()
-
+            
+                
     def load_specialties(self):
         with self.conn as conn:
             with conn.cursor() as cur:
@@ -57,6 +58,11 @@ class UpdateEmployee(QDialog):
         if not new_surname or not new_name:
             QMessageBox.critical(self, "Ошибка", "Фамилия и имя не могут быть пустыми.")
             return
+        
+        if any(char.isdigit() for char in new_surname) or any(char.isdigit() for char in new_name):
+            QMessageBox.critical(self, "Ошибка", "Фамилия и имя не могут содержать цифры.")
+            return
+
 
         with self.conn as conn:
             with conn.cursor() as cur:
