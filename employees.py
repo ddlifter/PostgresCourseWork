@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QWidget, QHeaderView, QLineEdit, QDialog, QMessageBox, QTableWidget, QTableWidgetItem, QAbstractItemView, QApplication
+from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QWidget, QHeaderView, QHBoxLayout, QDialog, QMessageBox, QTableWidget, QTableWidgetItem, QAbstractItemView, QApplication
 import psycopg2
 from PyQt5.QtCore import Qt
 from connection import ConnectionManager
@@ -19,47 +19,49 @@ class Employees(QWidget):
         x = (screen_geometry.width() - self.width()) // 2
         y = (screen_geometry.height() - self.height()) // 2
         self.move(x, y)
-        self.setLayout(layout)
-        self.table_widget = QTableWidget()
-        self.table_widget.setGeometry(50, 50, 500, 300)
+        
+        # Создаем горизонтальный layout для кнопок "Добавить", "Изменить", "Удалить"
+        button_layout = QHBoxLayout()
 
-        # Set the selection behavior to select entire rows
-        self.table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
-
-        self.add_button = QPushButton("Добавить сотрудника")
+        self.add_button = QPushButton("Добавить")
         self.add_button.clicked.connect(self.open_add_dialog)
-        layout.addWidget(self.add_button)
+        button_layout.addWidget(self.add_button)
 
-        self.update_button = QPushButton("Обновить")
+        self.update_button = QPushButton("Изменить")
         self.update_button.clicked.connect(self.open_update_dialog)
-        layout.addWidget(self.update_button)
+        button_layout.addWidget(self.update_button)
 
         self.delete_button = QPushButton("Удалить")
         self.delete_button.clicked.connect(self.delete_selected_row)
-        layout.addWidget(self.delete_button)
+        button_layout.addWidget(self.delete_button)
         
-        self.back_button = QPushButton("Вернуться на главное окно")  # Создаем кнопку
-        self.back_button.clicked.connect(self.go_to_main_window)  # Подключаем метод
-        layout.addWidget(self.back_button)  # Добавляем кнопку в макет
+        layout.addLayout(button_layout)
+        
+        # Создаем кнопку для возврата на главное окно
+        self.back_button = QPushButton("Вернуться на главное окно")
+        self.back_button.clicked.connect(self.go_to_main_window)
+        layout.addWidget(self.back_button)
 
+        # Создаем виджет таблицы и настраиваем его
+        self.table_widget = QTableWidget()
+        self.table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
         layout.addWidget(self.table_widget)
-        
+
+        self.setLayout(layout)
+
         self.table_widget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
         if not IsAdmin:
             self.add_button.setEnabled(False)
             self.delete_button.setEnabled(False)
             self.update_button.setEnabled(False)
-            self.show_data_button.setEnabled(False)
 
+        # Загружаем данные из базы данных и настраиваем таблицу
         self.load_data_from_db()
-        
-        
+
     def go_to_main_window(self):
         self.main_form.show()
         self.close()
-        
-        
 
     def load_data_from_db(self):
         query = """
@@ -102,7 +104,6 @@ class Employees(QWidget):
                     dialog = AddEmployee(self.conn)
                     if dialog.exec_():
                         self.load_data_from_db()
-
 
     def delete_selected_row(self):
         with self.conn as conn:

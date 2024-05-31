@@ -54,7 +54,6 @@ class Norms(QWidget):
             self.add_button.setEnabled(False)
             self.delete_button.setEnabled(False)
             self.update_button.setEnabled(False)
-            self.show_data_button.setEnabled(False)
 
         # Загружаем данные из базы данных и настраиваем таблицу
         self.load_data_from_db()

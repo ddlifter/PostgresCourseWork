@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QApplication, QHeaderView, QPushButton, QVBoxLayout, QWidget, QLabel, QTableWidget, QTableWidgetItem, QMessageBox, QAbstractItemView
+from PyQt5.QtWidgets import QApplication, QHeaderView, QHBoxLayout, QPushButton, QVBoxLayout, QWidget, QLabel, QTableWidget, QTableWidgetItem, QMessageBox, QAbstractItemView
 from connection import ConnectionManager
 from add_specialty import AddSpecialty
 from update_specialty import UpdateSpecialty
@@ -7,7 +7,7 @@ from PyQt5.QtCore import Qt
 class Specialties(QWidget):
     def __init__(self, main_form, conn: ConnectionManager, IsAdmin):
         self.main_form = main_form
-        self.conn : ConnectionManager = conn
+        self.conn: ConnectionManager = conn
         super().__init__()
         self.showMaximized()
         layout = QVBoxLayout()
@@ -19,42 +19,45 @@ class Specialties(QWidget):
         y = (screen_geometry.height() - self.height()) // 2
         self.move(x, y)
         
-        self.setLayout(layout)
-        self.table_widget = QTableWidget()
-        self.table_widget.setGeometry(50, 50, 500, 300)  # Установите размеры и позицию
-
-        # Set the selection behavior to select entire rows
-        self.table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        # Создаем горизонтальный layout для кнопок "Добавить", "Изменить", "Удалить"
+        button_layout = QHBoxLayout()
 
         self.add_button = QPushButton("Добавить")
         self.add_button.clicked.connect(self.open_add_dialog)
-        layout.addWidget(self.add_button)
-        
-        self.update_data_button = QPushButton("Обновить данные")
-        self.update_data_button.clicked.connect(self.open_update_dialog)
-        layout.addWidget(self.update_data_button)
-        
+        button_layout.addWidget(self.add_button)
+
+        self.update_button = QPushButton("Изменить")
+        self.update_button.clicked.connect(self.open_update_dialog)
+        button_layout.addWidget(self.update_button)
+
         self.delete_button = QPushButton("Удалить")
         self.delete_button.clicked.connect(self.delete_selected_row)
-        layout.addWidget(self.delete_button)
+        button_layout.addWidget(self.delete_button)
         
-        self.back_button = QPushButton("Вернуться на главное окно")  # Создаем кнопку
-        self.back_button.clicked.connect(self.go_to_main_window)  # Подключаем метод
+        layout.addLayout(button_layout)
+        
+        # Создаем кнопку для возврата на главное окно
+        self.back_button = QPushButton("Вернуться на главное окно")
+        self.back_button.clicked.connect(self.go_to_main_window)
         layout.addWidget(self.back_button)
-        
+
+        # Создаем виджет таблицы и настраиваем его
+        self.table_widget = QTableWidget()
+        self.table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
         layout.addWidget(self.table_widget)
-        
+
+        self.setLayout(layout)
+
         self.table_widget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         
         if not IsAdmin:
             self.add_button.setEnabled(False)
             self.delete_button.setEnabled(False)
-            self.update_data_button.setEnabled(False)
-            self.show_data_button.setEnabled(False)
+            self.update_button.setEnabled(False)
 
-        # Load data from database and configure table
+        # Загружаем данные из базы данных и настраиваем таблицу
         self.load_data_from_db()
-        
+
     def go_to_main_window(self):
         self.main_form.show()
         self.close()
@@ -98,7 +101,6 @@ class Specialties(QWidget):
                 if not selected_rows:
                     QMessageBox.information(self, "Уведомление", "Выберите строку для удаления.")
                     return
-                # Определяем id по другим полям (например, по названию специальности)
                 spec_name = self.table_widget.item(selected_rows[0].row(), 0).text()
                 try:
                     cursor.execute("DELETE FROM specialties WHERE name = %s", (spec_name,))
@@ -118,12 +120,11 @@ class Specialties(QWidget):
         spec_name = self.table_widget.item(selected_row_index, 0).text()
         description = self.table_widget.item(selected_row_index, 1).text()
         
-        # Запрос id_specialty из базы данных по name и description
         with self.conn as conn:
             with conn.cursor() as cur:
                 cur.execute("SELECT id_specialty FROM specialties WHERE name = %s AND description = %s", (spec_name, description))
-                id_specialty = cur.fetchone()[0]  # Получаем первый элемент первой строки (предполагается, что будет только одна строка)
+                id_specialty = cur.fetchone()[0]
 
-        dialog = UpdateSpecialty(self.conn, id_specialty, spec_name, description)  # Передаем id_specialty в UpdateSpecialty
+        dialog = UpdateSpecialty(self.conn, id_specialty, spec_name, description)
         if dialog.exec_():
             self.load_data_from_db()

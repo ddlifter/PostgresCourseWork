@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QApplication, QVBoxLayout, QPushButton, QWidget, QHeaderView, QLineEdit, QDialog, QMessageBox, QTableWidget, QTableWidgetItem, QAbstractItemView
+from PyQt5.QtWidgets import QApplication, QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QHeaderView, QLineEdit, QDialog, QMessageBox, QTableWidget, QTableWidgetItem, QAbstractItemView
 import psycopg2
 from PyQt5.QtCore import Qt
 from connection import ConnectionManager
@@ -19,42 +19,46 @@ class Training(QWidget):
         x = (screen_geometry.width() - self.width()) // 2
         y = (screen_geometry.height() - self.height()) // 2
         self.move(x, y)
-        self.setLayout(layout)
-        self.table_widget = QTableWidget()
-        self.table_widget.setGeometry(50, 50, 500, 300)  # Установите размеры и позицию
         
+        # Создаем горизонтальный layout для кнопок "Добавить", "Изменить", "Удалить"
+        button_layout = QHBoxLayout()
+
         self.add_button = QPushButton("Добавить")
         self.add_button.clicked.connect(self.open_add_dialog)
-        layout.addWidget(self.add_button)
-        
-        self.update_data_button = QPushButton("Обновить данные")
-        self.update_data_button.clicked.connect(self.open_update_dialog)
-        layout.addWidget(self.update_data_button)
-        
+        button_layout.addWidget(self.add_button)
+
+        self.update_button = QPushButton("Изменить")
+        self.update_button.clicked.connect(self.open_update_dialog)
+        button_layout.addWidget(self.update_button)
+
         self.delete_button = QPushButton("Удалить")
         self.delete_button.clicked.connect(self.delete_selected_row)
-        layout.addWidget(self.delete_button)
+        button_layout.addWidget(self.delete_button)
         
-        self.back_button = QPushButton("Вернуться на главное окно")  # Создаем кнопку
-        self.back_button.clicked.connect(self.go_to_main_window)  # Подключаем метод
+        layout.addLayout(button_layout)
+        
+        # Создаем кнопку для возврата на главное окно
+        self.back_button = QPushButton("Вернуться на главное окно")
+        self.back_button.clicked.connect(self.go_to_main_window)
         layout.addWidget(self.back_button)
-        
+
+        # Создаем виджет таблицы и настраиваем его
+        self.table_widget = QTableWidget()
+        self.table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
         layout.addWidget(self.table_widget)
-        
+
+        self.setLayout(layout)
+
         self.table_widget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         
-        if IsAdmin != True:
+        if not IsAdmin:
             self.add_button.setEnabled(False)
             self.delete_button.setEnabled(False)
-            self.update_data_button.setEnabled(False)
-            self.show_data_button.setEnabled(False)
-            
+            self.update_button.setEnabled(False)
+
+        # Загружаем данные из базы данных и настраиваем таблицу
         self.load_data_from_db()
 
-            
-        self.table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.table_widget.itemSelectionChanged.connect(self.open_update_dialog)
-        
     def go_to_main_window(self):
         self.main_form.show()
         self.close()
@@ -85,57 +89,34 @@ class Training(QWidget):
                 
         self.table_widget.resizeColumnsToContents()
 
-
     def open_add_dialog(self):
         dialog = AddTraining(self.conn)
         if dialog.exec_():
             self.load_data_from_db()
             
     def open_update_dialog(self):
-        sender_button = self.sender()
-        if sender_button == self.update_data_button:
-            selected_rows = self.table_widget.selectionModel().selectedRows()
-            if selected_rows:
-                selected_row_index = selected_rows[0].row()
-                surname = self.table_widget.item(selected_row_index, 0).text()
-                norm = self.table_widget.item(selected_row_index, 1).text()
-                date = self.table_widget.item(selected_row_index, 2).text()
+        selected_rows = self.table_widget.selectionModel().selectedRows()
+        if not selected_rows:
+            QMessageBox.information(self, "Напоминание", "Выберите строку для обновления.")
+            return
 
-                with self.conn as conn:
-                    with conn.cursor() as cur:
-                        try:
-                            cur.execute("SELECT id_training FROM training WHERE id_employee IN (SELECT id_employee FROM employees WHERE surname = %s) AND id_norm IN (SELECT id_norm FROM norms WHERE name = %s) AND data = %s", (surname, norm, date))
-                            training_id = cur.fetchone()[0]
-                        except Exception as e:
-                            print(f"Ошибка при получении id_training: {e}")
-                            return
+        selected_row_index = selected_rows[0].row()
+        surname = self.table_widget.item(selected_row_index, 0).text()
+        norm = self.table_widget.item(selected_row_index, 1).text()
+        date = self.table_widget.item(selected_row_index, 2).text()
 
-                dialog = UpdateTraining(self.conn, training_id)
-                self.load_data_from_db()
-                if dialog.exec_():
-                    self.load_data_from_db()
-            else:
-                QMessageBox.information(self, "Напоминание", "Выберите строку для обновления.")
-        elif sender_button == self.delete_button:
-            selected_rows = self.table_widget.selectionModel().selectedRows()
-            if not selected_rows:
-                QMessageBox.information(self, "Уведомление", "Выберите строку для удаления.")
-                return
+        with self.conn as conn:
+            with conn.cursor() as cur:
+                try:
+                    cur.execute("SELECT id_training FROM training WHERE id_employee IN (SELECT id_employee FROM employees WHERE surname = %s) AND id_norm IN (SELECT id_norm FROM norms WHERE name = %s) AND data = %s", (surname, norm, date))
+                    training_id = cur.fetchone()[0]
+                except Exception as e:
+                    print(f"Ошибка при получении id_training: {e}")
+                    return
 
-            selected_row_index = selected_rows[0].row()
-            surname = self.table_widget.item(selected_row_index, 0).text()
-            norm = self.table_widget.item(selected_row_index, 1).text()
-            date = self.table_widget.item(selected_row_index, 2).text()
-
-            with self.conn as conn:
-                with conn.cursor() as cursor:
-                    try:
-                        cursor.execute("DELETE FROM training WHERE id_employee IN (SELECT id_employee FROM employees WHERE surname = %s) AND id_norm IN (SELECT id_norm FROM norms WHERE name = %s) AND data = %s", (surname, norm, date))
-                        conn.commit()
-                        QMessageBox.information(self, "Успех", "Строка успешно удалена.")
-                        self.load_data_from_db()
-                    except Exception as e:
-                        QMessageBox.critical(self, "Ошибка", f"Не удалось удалить строку: {str(e)}")
+        dialog = UpdateTraining(self.conn, training_id)
+        if dialog.exec_():
+            self.load_data_from_db()
 
     def delete_selected_row(self):
         selected_rows = self.table_widget.selectionModel().selectedRows()
