@@ -10,7 +10,7 @@ class UpdateNorm(QDialog):
         self.id_employee = id_employee
         self.setFixedSize(250, 230)
 
-        self.setWindowTitle("Обновление информации о норме")
+        self.setWindowTitle("Изменить данные")
         layout = QVBoxLayout()
 
         self.surname_label = QLabel("Название:")

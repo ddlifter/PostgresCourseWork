@@ -9,7 +9,7 @@ class UpdateTraining(QDialog):
         self.setFixedSize(250, 230)
         self.training_id = training_id
 
-        self.setWindowTitle("Обновить данные")
+        self.setWindowTitle("Изменить данные")
         layout = QVBoxLayout()
 
         self.date_label = QLabel("Дата:")
@@ -19,10 +19,6 @@ class UpdateTraining(QDialog):
         self.date_input = QDateEdit()
         self.date_input.setCalendarPopup(True)  # Включаем возможность открытия календаря
         layout.addWidget(self.date_input)
-
-        # Устанавливаем макет в виджет
-        self.setLayout(layout)
-        self.setWindowTitle("Выбор даты")
 
         self.setLayout(layout)
 

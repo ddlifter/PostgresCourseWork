@@ -9,7 +9,7 @@ class UpdateSpecialty(QDialog):
         self.spec_id = spec_id
         self.spec_name = spec_name
         self.description = description
-        self.setWindowTitle("Обновить специальность")
+        self.setWindowTitle("Изменить данные")
         
         layout = QVBoxLayout()
         
@@ -25,7 +25,7 @@ class UpdateSpecialty(QDialog):
         layout.addWidget(self.description_label)
         layout.addWidget(self.description_edit)
         
-        self.update_button = QPushButton("Обновить")
+        self.update_button = QPushButton("Подтвердить")
         self.update_button.clicked.connect(self.update_specialty)
         layout.addWidget(self.update_button)
         

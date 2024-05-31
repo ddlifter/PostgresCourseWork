@@ -10,7 +10,7 @@ class UpdateEmployee(QDialog):
         self.id_employee = id_employee
         self.setFixedSize(250, 230)
 
-        self.setWindowTitle("Обновление информации о сотруднике")
+        self.setWindowTitle("Изменить данные")
         layout = QVBoxLayout()
 
         self.surname_label = QLabel("Фамилия:")
