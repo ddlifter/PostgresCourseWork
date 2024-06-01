@@ -24,10 +24,8 @@ class MainForm(QMainWindow):
         y = (screen_geometry.height() - self.height()) // 2
         self.move(x, y)
 
-        # Создаем основной layout
         main_layout = QVBoxLayout()
 
-        # Создаем layout для кнопки "Обучение"
         training_layout = QHBoxLayout()
         self.training_button = QPushButton("Процесс обучения")
         self.training_button.clicked.connect(self.open_training_form)
@@ -35,13 +33,11 @@ class MainForm(QMainWindow):
         training_layout.addWidget(self.training_button)
         main_layout.addLayout(training_layout)
 
-        # Подпись "Справочники"
-        main_layout.addWidget(QWidget())  # Добавляем пустой виджет для создания пробела
+        main_layout.addWidget(QWidget())  
         label = QLabel("Справочники")
         label.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(label)
 
-        # Создаем layout для кнопок "Сотрудники" и "Специальности"
         references_layout = QHBoxLayout()
         buttons_info = [("Сотрудники", self.open_form1),
                         ("Специальности", self.open_form2)]
@@ -61,12 +57,10 @@ class MainForm(QMainWindow):
             norms_layout.addWidget(button)
         main_layout.addLayout(norms_layout)
 
-        # Кнопка "Выйти"
         self.logout_button = QPushButton("Выйти")
         self.logout_button.clicked.connect(self.open_login_form)
         main_layout.addWidget(self.logout_button, alignment=Qt.AlignCenter)
 
-        # Создаем виджет, на котором будет размещен основной layout
         central_widget = QWidget()
         central_widget.setLayout(main_layout)
         self.setCentralWidget(central_widget)
@@ -118,7 +112,6 @@ class AuthorizationWindow(QWidget):
 
         layout = QVBoxLayout()
 
-        # Макет для поля ввода логина
         username_layout = QHBoxLayout()
         username_layout.setAlignment(Qt.AlignCenter)
         self.usernameLabel = QLabel("Логин:", self)
@@ -127,7 +120,6 @@ class AuthorizationWindow(QWidget):
         username_layout.addWidget(self.usernameInput)
         layout.addLayout(username_layout)
 
-        # Макет для поля ввода пароля
         password_layout = QHBoxLayout()
         password_layout.setAlignment(Qt.AlignCenter)
         self.passwordLabel = QLabel("Пароль:", self)
@@ -137,7 +129,6 @@ class AuthorizationWindow(QWidget):
         password_layout.addWidget(self.passwordInput)
         layout.addLayout(password_layout)
 
-        # Макет для кнопки
         button_layout = QHBoxLayout()
         button_layout.setAlignment(Qt.AlignCenter)
         self.loginButton = QPushButton("Войти", self)
@@ -157,15 +148,12 @@ class AuthorizationWindow(QWidget):
             role = "admin_role"
             IsAdmin = True
         else:
-            # Подключаемся к базе данных
             conn = psycopg2.connect(host='localhost', user='postgres', password='12345', database='postgres')
             cursor = conn.cursor()
             
-            # Выполняем запрос к базе данных для загрузки фамилий сотрудников
             cursor.execute("SELECT surname FROM employees")
             employee_surnames = [row[0] for row in cursor.fetchall()]  # Получаем все фамилии сотрудников в массив
 
-            # Проверяем, есть ли введенный логин в фамилиях сотрудников
             if username in employee_surnames and password == "12345":
                 role = "employee_user"
                 IsAdmin = False
@@ -173,7 +161,6 @@ class AuthorizationWindow(QWidget):
                 QMessageBox.warning(self, "Ошибка", "Неверный логин или пароль.")
                 return
             
-            # Закрываем соединение с базой данных
             cursor.close()
             conn.close()
 

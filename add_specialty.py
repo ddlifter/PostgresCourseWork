@@ -39,7 +39,6 @@ class AddSpecialty(QDialog):
         surname = self.surname_input.text().strip()
         name = self.name_input.text().strip()
 
-        # Проверяем, что оба поля не пустые и не содержат цифры
         if surname and name and surname.isalpha() and name.isalpha():
             self.submit_button.setEnabled(True)
         else:

@@ -15,9 +15,8 @@ class UpdateTraining(QDialog):
         self.date_label = QLabel("Дата:")
         layout.addWidget(self.date_label)
 
-        # Поле для ввода даты с раскрывающимся календарем
         self.date_input = QDateEdit()
-        self.date_input.setCalendarPopup(True)  # Включаем возможность открытия календаря
+        self.date_input.setCalendarPopup(True)  
         layout.addWidget(self.date_input)
 
         self.setLayout(layout)

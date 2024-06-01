@@ -19,7 +19,6 @@ class Specialties(QWidget):
         y = (screen_geometry.height() - self.height()) // 2
         self.move(x, y)
         
-        # Создаем горизонтальный layout для кнопок "Добавить", "Изменить", "Удалить"
         button_layout = QHBoxLayout()
 
         self.add_button = QPushButton("Добавить")
@@ -36,12 +35,10 @@ class Specialties(QWidget):
         
         layout.addLayout(button_layout)
         
-        # Создаем кнопку для возврата на главное окно
         self.back_button = QPushButton("Вернуться на главное окно")
         self.back_button.clicked.connect(self.go_to_main_window)
         layout.addWidget(self.back_button)
 
-        # Создаем виджет таблицы и настраиваем его
         self.table_widget = QTableWidget()
         self.table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.table_widget.setSelectionMode(QAbstractItemView.SingleSelection)
@@ -56,7 +53,6 @@ class Specialties(QWidget):
             self.delete_button.setEnabled(False)
             self.update_button.setEnabled(False)
 
-        # Загружаем данные из базы данных и настраиваем таблицу
         self.load_data_from_db()
 
     def go_to_main_window(self):

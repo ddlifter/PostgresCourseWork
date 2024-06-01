@@ -3,7 +3,7 @@ import psycopg2
 from PyQt5.QtCore import Qt
 from connection import ConnectionManager
 from add_norm import AddNorm
-from update_norm import UpdateNorm  # Подключаем класс для окна обновления сотрудника
+from update_norm import UpdateNorm  
 
 class Norms(QWidget):
     def __init__(self, main_form, conn: ConnectionManager, IsAdmin):
@@ -19,7 +19,6 @@ class Norms(QWidget):
         y = (screen_geometry.height() - self.height()) // 2
         self.move(x, y)
         
-        # Создаем горизонтальный layout для кнопок
         button_layout = QHBoxLayout()
 
         self.add_button = QPushButton("Добавить")
@@ -36,18 +35,15 @@ class Norms(QWidget):
         
         layout.addLayout(button_layout)
         
-        # Создаем кнопку для возврата на главное окно
         self.back_button = QPushButton("Вернуться на главное окно")
         self.back_button.clicked.connect(self.go_to_main_window)
         layout.addWidget(self.back_button)
 
-        # Создаем виджет таблицы и настраиваем его
         self.table_widget = QTableWidget()
         self.table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.table_widget.setSelectionMode(QAbstractItemView.SingleSelection)  # Set selection mode
         layout.addWidget(self.table_widget)
 
-        # Растягиваем таблицу на всю ширину формы
         self.table_widget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
 
@@ -56,7 +52,6 @@ class Norms(QWidget):
             self.delete_button.setEnabled(False)
             self.update_button.setEnabled(False)
 
-        # Загружаем данные из базы данных и настраиваем таблицу
         self.load_data_from_db()
         
     def go_to_main_window(self):

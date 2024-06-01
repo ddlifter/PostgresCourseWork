@@ -17,14 +17,14 @@ class AddEmployee(QDialog):
         self.surname_label = QLabel("Фамилия:")
         self.surname_input = QLineEdit()
         self.surname_input.setReadOnly(False)
-        self.surname_input.textChanged.connect(self.check_inputs)  # Проверка фамилии при изменении текста
+        self.surname_input.textChanged.connect(self.check_inputs)  
         layout.addWidget(self.surname_label)
         layout.addWidget(self.surname_input)
 
         self.name_label = QLabel("Имя:")
         self.name_input = QLineEdit()
         self.name_input.setReadOnly(False)
-        self.name_input.textChanged.connect(self.check_inputs)  # Проверка имени при изменении текста
+        self.name_input.textChanged.connect(self.check_inputs)  
         layout.addWidget(self.name_label)
         layout.addWidget(self.name_input)
 
@@ -40,21 +40,18 @@ class AddEmployee(QDialog):
         self.submit_button.clicked.connect(self.submit_data)
         layout.addWidget(self.submit_button)
 
-        # Добавим кнопку "Submit" и сделаем ее неактивной изначально
         self.submit_button.setEnabled(False)
 
     def check_inputs(self):
         surname = self.surname_input.text()
         name = self.name_input.text()
 
-        # Проверяем, что оба поля не пустые и не содержат цифры
         if surname and name and surname.isalpha() and name.isalpha():
             self.submit_button.setEnabled(True)
         else:
             self.submit_button.setEnabled(False)
 
     def submit_data(self):
-        # Оставляем ваш существующий код без изменений
         with self.conn as conn:
             with conn.cursor() as cur:
                 name = self.name_input.text()
@@ -70,7 +67,6 @@ class AddEmployee(QDialog):
                     print(f"Ошибка при добавлении сотрудника: {e}")
             
     def loadSpecialties(self):
-        # Оставляем ваш существующий код без изменений
         with self.conn as conn:
             with conn.cursor() as cur:
                 try:

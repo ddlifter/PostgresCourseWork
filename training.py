@@ -20,7 +20,6 @@ class Training(QWidget):
         y = (screen_geometry.height() - self.height()) // 2
         self.move(x, y)
         
-        # Создаем горизонтальный layout для кнопок "Добавить", "Изменить", "Удалить"
         button_layout = QHBoxLayout()
 
         self.add_button = QPushButton("Добавить")
@@ -37,12 +36,10 @@ class Training(QWidget):
         
         layout.addLayout(button_layout)
         
-        # Создаем кнопку для возврата на главное окно
         self.back_button = QPushButton("Вернуться на главное окно")
         self.back_button.clicked.connect(self.go_to_main_window)
         layout.addWidget(self.back_button)
 
-        # Создаем виджет таблицы и настраиваем его
         self.table_widget = QTableWidget()
         self.table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.table_widget.setSelectionMode(QAbstractItemView.SingleSelection)
@@ -57,7 +54,6 @@ class Training(QWidget):
             self.delete_button.setEnabled(False)
             self.update_button.setEnabled(False)
 
-        # Загружаем данные из базы данных и настраиваем таблицу
         self.load_data_from_db()
 
     def go_to_main_window(self):
@@ -70,7 +66,7 @@ class Training(QWidget):
                 cur.execute("SELECT e.surname, n.name, t.data FROM training t JOIN employees e ON t.id_employee = e.id_employee JOIN norms n ON t.id_norm = n.id_norm")
                 rows = cur.fetchall()
 
-        self.table_widget.clear()  # Очищаем таблицу перед загрузкой новых данных
+        self.table_widget.clear()  
 
         if not rows:
             self.table_widget.hide()
@@ -85,7 +81,7 @@ class Training(QWidget):
         for i, row in enumerate(rows):
             for j, value in enumerate(row):
                 item = QTableWidgetItem(str(value))
-                item.setFlags(item.flags() ^ Qt.ItemIsEditable)  # Запретить редактирование ячеек
+                item.setFlags(item.flags() ^ Qt.ItemIsEditable)  
                 self.table_widget.setItem(i, j, item)
                 
         self.table_widget.resizeColumnsToContents()
